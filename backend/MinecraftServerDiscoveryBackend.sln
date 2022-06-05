@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31321.278
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasscanWrapper", "MasscanWrapper\MasscanWrapper.csproj", "{FFBF0D10-3FA1-4AF8-BEA2-DD7685DF92CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinecraftServerDiscoveryApi", "MinecraftServerDiscoveryApi\MinecraftServerDiscoveryApi.csproj", "{E6793C2A-FEAD-4534-AFDB-28A3DFE07AD4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FFBF0D10-3FA1-4AF8-BEA2-DD7685DF92CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFBF0D10-3FA1-4AF8-BEA2-DD7685DF92CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFBF0D10-3FA1-4AF8-BEA2-DD7685DF92CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFBF0D10-3FA1-4AF8-BEA2-DD7685DF92CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6793C2A-FEAD-4534-AFDB-28A3DFE07AD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6793C2A-FEAD-4534-AFDB-28A3DFE07AD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6793C2A-FEAD-4534-AFDB-28A3DFE07AD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6793C2A-FEAD-4534-AFDB-28A3DFE07AD4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1A120083-CAD8-44A2-898C-216A58A12639}
+	EndGlobalSection
+EndGlobal
