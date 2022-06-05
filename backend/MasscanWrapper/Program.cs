@@ -22,7 +22,7 @@ namespace MasscanWrapper
             p.OutputDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
             p.ErrorDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
             p.StartInfo.FileName = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/masscan.exe";
-            p.StartInfo.Arguments = "-p25565 31.187.165.214 --rate 69696 --exclude 255.255.255.255";
+            p.StartInfo.Arguments = "-p25565 0.0.0.0/0 --rate 69696 --exclude 255.255.255.255 --source-ip 192.168.1.200";
             stopwatch.Start();
             p.Start();
             p.BeginOutputReadLine();
@@ -33,6 +33,7 @@ namespace MasscanWrapper
             {
                 if(p.HasExited)
                 {
+                    Console.WriteLine("Restarting scanning process!");
                     p.Start();
                     p.BeginOutputReadLine();
                     p.BeginErrorReadLine();
