@@ -7,6 +7,7 @@ import { MaterialModule } from './material.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppSideMenuBarComponent } from './app-side-menu-bar/app-side-menu-bar.component';
 import { AppHomePageComponent } from './app-home-page/app-home-page.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -18,6 +19,7 @@ import { AppHomePageComponent } from './app-home-page/app-home-page.component';
     BrowserModule,
     AppRoutingModule,
     MaterialModule,
+    HttpClientModule,
     BrowserAnimationsModule
   ],
   providers: [],

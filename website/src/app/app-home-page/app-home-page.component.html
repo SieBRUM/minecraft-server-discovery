@@ -1,1 +1,36 @@
-<p>app-home-page works!</p>
+<table mat-table [dataSource]="servers">
+
+  <ng-container matColumnDef="ipport">
+    <th mat-header-cell *matHeaderCellDef> Ip address + port </th>
+    <td mat-cell *matCellDef="let element"> {{ element.ipAddress }}:{{ element.port }} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="motd">
+    <th mat-header-cell *matHeaderCellDef> MOTD </th>
+    <td mat-cell *matCellDef="let element"> {{ element.motd }} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="players">
+    <th mat-header-cell *matHeaderCellDef> Players </th>
+    <td mat-cell *matCellDef="let element"> {{ element.currentAmountPlayers }} / {{ element.maxAmountPlayers }} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="version">
+    <th mat-header-cell *matHeaderCellDef> Version </th>
+    <td mat-cell *matCellDef="let element"> {{ element.version }} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="lastonline">
+    <th mat-header-cell *matHeaderCellDef> Last online </th>
+    <td mat-cell *matCellDef="let element"> {{ element.lastSeenOnline }} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="geocountry">
+    <th mat-header-cell *matHeaderCellDef> Country </th>
+    <td mat-cell *matCellDef="let element"> {{ element.geoInformation?.country ? element.geoInformation.country : '-'}}
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>

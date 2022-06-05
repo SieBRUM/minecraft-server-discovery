@@ -49,6 +49,12 @@ namespace MinecraftServerDiscoveryApi
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "MinecraftServerDiscoveryApi v1"));
             }
 
+            app.UseCors(x => x
+               .AllowAnyMethod()
+               .AllowAnyHeader()
+               .SetIsOriginAllowed(origin => true)
+               .AllowCredentials()); // allow credentials
+
             app.UseHttpsRedirection();
 
             app.UseRouting();
