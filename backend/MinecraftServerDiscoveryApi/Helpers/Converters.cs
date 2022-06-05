@@ -1,4 +1,5 @@
-﻿using MinecraftServerDiscoveryApi.Models;
+﻿using MinecraftServerDiscoveryApi.DTO;
+using MinecraftServerDiscoveryApi.Models;
 using MineStatLib;
 using System;
 
@@ -30,6 +31,21 @@ namespace MinecraftServerDiscoveryApi.Helpers
             server.MaxAmountPlayers = ms.MaximumPlayersInt;
             server.Latency = ms.Latency;
             server.LastSeenOnline = DateTime.Now;
+        }
+
+        public static GeoInformation ExternalGeoInformationToNewGeoInformation(ExternalGeoLocationInformation external)
+        {
+            return new GeoInformation()
+            {
+                Continent = external.Continent,
+                Country = external.Country,
+                RegionName = external.RegionName,
+                ZipCode = external.Zip,
+                Lat = external.Lat,
+                Lon = external.Lon,
+                Isp = external.Isp,
+                Timezone = external.Timezone
+            };
         }
     }
 }

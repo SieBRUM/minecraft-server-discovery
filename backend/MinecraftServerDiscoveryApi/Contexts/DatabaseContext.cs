@@ -17,7 +17,7 @@ namespace MinecraftServerDiscoveryApi.Contexts
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var connectionString = "server=localhost;user=root;password=root;database=redteamingdb";
+            var connectionString = "server=127.0.0.1;user=root;password=my-secret-pw;database=minecraftdiscoverytool";
             optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
             optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
             optionsBuilder.EnableSensitiveDataLogging();

@@ -24,7 +24,7 @@ namespace MinecraftServerDiscoveryApi.Controllers
             _dbContext = context;
         }
 
-        [HttpGet("{ip}")]
+        [HttpGet("submit/{ip}")]
         public async Task<IActionResult> DiscoverServer(string ip)
         {
             if(string.IsNullOrWhiteSpace(ip))
@@ -46,7 +46,9 @@ namespace MinecraftServerDiscoveryApi.Controllers
                 if(minecraftServer == default)
                 {
                     minecraftServer = Converters.MineStatToNewServer(ms);
-                    GeoLocationHelper.SetGeoData(ref minecraftServer);
+                    await GeoLocationHelper.SetGeoData(minecraftServer);
+                    await _dbContext.GeoInformation.AddAsync(minecraftServer.GeoInformation);
+                    await _dbContext.SaveChangesAsync();
                     await _dbContext.Servers.AddAsync(minecraftServer);
                     await _dbContext.SaveChangesAsync();
                 }
@@ -57,26 +59,29 @@ namespace MinecraftServerDiscoveryApi.Controllers
                     await _dbContext.SaveChangesAsync();
                 }
 
-                foreach (var player in ms.PlayerList)
+                if(ms.CurrentPlayersInt != 0 && ms.CurrentPlayers != default)
                 {
-                    var dbPlayer = await _dbContext.Players.FirstOrDefaultAsync(x => x.PlayerName == player);
-                    if (player == default)
+                    foreach (var player in ms.PlayerList)
                     {
-                        dbPlayer = new Player()
+                        var dbPlayer = await _dbContext.Players.FirstOrDefaultAsync(x => x.PlayerName == player);
+                        if (player == default)
                         {
-                            PlayerName = player,
-                            Servers = new List<Server>()
-                        };
-                        dbPlayer.Servers.Add(minecraftServer);
-                        await _dbContext.Players.AddAsync(dbPlayer);
-                        await _dbContext.SaveChangesAsync();
-                    }
-                    else
-                    {
-                        if (!dbPlayer.Servers.Any(x => x.IpAddress == ip))
-                        {
+                            dbPlayer = new Player()
+                            {
+                                PlayerName = player,
+                                Servers = new List<Server>()
+                            };
                             dbPlayer.Servers.Add(minecraftServer);
+                            await _dbContext.Players.AddAsync(dbPlayer);
                             await _dbContext.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            if (!dbPlayer.Servers.Any(x => x.IpAddress == ip))
+                            {
+                                dbPlayer.Servers.Add(minecraftServer);
+                                await _dbContext.SaveChangesAsync();
+                            }
                         }
                     }
                 }
@@ -96,6 +101,36 @@ namespace MinecraftServerDiscoveryApi.Controllers
             }
 
             return Ok(minecraftServer);
+        }
+
+        [HttpGet("server/{ip}")]
+        public async Task<IActionResult> GetServerInfo(string ip)
+        {
+
+            if (string.IsNullOrWhiteSpace(ip))
+            {
+                return BadRequest();
+            }
+
+            if (!ipRegex.IsMatch(ip))
+            {
+                return BadRequest();
+            }
+
+            var server = _dbContext.Servers.FirstOrDefaultAsync(x => x.IpAddress == ip);
+
+            if(server == default)
+            {
+                return NotFound();
+            }
+
+            return Ok(server);
+        }
+
+        [HttpGet("server")]
+        public async Task<IActionResult> GetAllServers()
+        {
+            return Ok(await _dbContext.Servers.Include(x => x.Players).Include(x => x.GeoInformation).ToListAsync());
         }
     }
 }

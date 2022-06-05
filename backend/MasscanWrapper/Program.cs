@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
+using Flurl.Http;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace MasscanWrapper
 {
@@ -13,7 +14,8 @@ namespace MasscanWrapper
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Starting scanning process");
+            Console.WriteLine("Starting scanning process. Sleeping for 5 seconds to allow the API to start...");
+            Thread.Sleep(5000);
             p.StartInfo.UseShellExecute = false;
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.RedirectStandardError = true;
@@ -33,7 +35,7 @@ namespace MasscanWrapper
                     DataReceivedEventArgs outLine)
         {
             // Collect the sort command output. 
-            if (!String.IsNullOrEmpty(outLine.Data))
+            if (!string.IsNullOrEmpty(outLine.Data))
             {
                 if (outLine.Data.Contains("Starting scanning process"))
                 {
@@ -42,7 +44,7 @@ namespace MasscanWrapper
                 else if (outLine.Data.Contains("Discovered"))
                 {
                     Console.WriteLine($"Hit! IP {IPAd.Match(outLine.Data)} has possible Minecraft server running!");
-                    Console.WriteLine(outLine.Data);
+                    $"https://localhost:44315/main/submit/{IPAd.Match(outLine.Data)}".AllowAnyHttpStatus().GetAsync();
                 }
                 else
                 {

@@ -14,8 +14,8 @@ namespace MinecraftServerDiscoveryApi.Models
         public string Country { get; set; }
         public string RegionName { get; set; }
         public string ZipCode { get; set; }
-        public string Lat { get; set; }
-        public string Lon { get; set; }
+        public double Lat { get; set; }
+        public double Lon { get; set; }
         public string Isp { get; set; }
         public string Timezone { get; set; }
     }
