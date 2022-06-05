@@ -97,6 +97,7 @@ namespace MinecraftServerDiscoveryApi.Controllers
                     };
 
                     await _dbContext.AddAsync(minecraftServer);
+                    await _dbContext.SaveChangesAsync();
                 }
             }
 
