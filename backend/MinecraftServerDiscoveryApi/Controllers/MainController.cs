@@ -4,7 +4,6 @@ using MinecraftServerDiscoveryApi.Contexts;
 using MinecraftServerDiscoveryApi.Helpers;
 using MinecraftServerDiscoveryApi.Models;
 using MineStatLib;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -88,20 +87,6 @@ namespace MinecraftServerDiscoveryApi.Controllers
                             }
                         }
                     }
-                }
-            }
-            else
-            {
-                if(minecraftServer == default)
-                {
-                    minecraftServer = new Server()
-                    {
-                        Port = 25565,
-                        IpAddress = ip
-                    };
-
-                    await _dbContext.AddAsync(minecraftServer);
-                    await _dbContext.SaveChangesAsync();
                 }
             }
 

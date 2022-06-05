@@ -22,7 +22,7 @@ namespace MasscanWrapper
             p.OutputDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
             p.ErrorDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
             p.StartInfo.FileName = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/masscan.exe";
-            p.StartInfo.Arguments = "-p25565 0.0.0.0/0 --rate 69696 --exclude 255.255.255.255";
+            p.StartInfo.Arguments = "-p25565 0.0.0.0/0 --rate 1000 --exclude 255.255.255.255";
             stopwatch.Start();
             p.Start();
             p.BeginOutputReadLine();
