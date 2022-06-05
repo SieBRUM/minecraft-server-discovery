@@ -1,0 +1,13 @@
+.main-container {
+    // Calc based on height of top menu bar
+    height: calc(100% - 50px);
+
+    .main-content {
+        display: flex;
+        height: 100%;
+
+        .main-content-page {
+            flex-grow: 1;
+        }
+    }
+}

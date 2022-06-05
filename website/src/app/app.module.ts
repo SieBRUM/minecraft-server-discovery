@@ -5,10 +5,14 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { MaterialModule } from './material.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { AppSideMenuBarComponent } from './app-side-menu-bar/app-side-menu-bar.component';
+import { AppHomePageComponent } from './app-home-page/app-home-page.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    AppSideMenuBarComponent,
+    AppHomePageComponent
   ],
   imports: [
     BrowserModule,

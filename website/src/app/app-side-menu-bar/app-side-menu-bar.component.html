@@ -1,0 +1,20 @@
+<div class="menu-top-container">
+  <div class="menu-lower-container">
+    <div>
+      <div class="main-options" name="menu-options-list">
+        <button mat-stroked-button class="menu-option-button" (click)="onClickNavigate('home')"
+          [style]="isOnRoute('home')" name="menu-option-inventory">
+          <mat-icon>list</mat-icon>
+          Home
+        </button>
+      </div>
+    </div>
+  </div>
+  <div>
+    <button mat-button style="width: 100%; text-align: center;" (click)="onClickPinMenu()">
+      <mat-icon> {{ pinned ? 'lock_open' : 'lock' }}</mat-icon>
+      {{ pinned ? "Unpin menu" : "Pin menu" }}
+    </button>
+  </div>
+
+</div>
