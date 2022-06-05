@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using MinecraftServerDiscoveryApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,11 @@ namespace MinecraftServerDiscoveryApi.Contexts
 {
     public class DatabaseContext : DbContext
     {
+
+        public DbSet<GeoInformation> GeoInformation { get; set; }
+        public DbSet<Player> Players { get; set; }
+        public DbSet<Server> Servers { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var connectionString = "server=localhost;user=root;password=root;database=redteamingdb";
