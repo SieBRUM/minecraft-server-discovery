@@ -11,7 +11,7 @@ export class AppHomePageComponent implements OnInit {
 
   isLoading = false;
   servers: IServer[] = [];
-  displayedColumns: string[] = ['ipport', 'motd', 'players', 'version', 'lastonline', 'geocountry'];
+  displayedColumns: string[] = ['ipport', 'motd', 'players', 'version', 'lastonline', 'geocountry', 'maps'];
 
   constructor(
     public apiService: ApiService
@@ -32,4 +32,7 @@ export class AppHomePageComponent implements OnInit {
     });
   }
 
+  onClickMap(lat: string, lon: string): void {
+    window.open(`https://maps.google.com/?q=${lat},${lon}`, '_blank');
+  }
 }
