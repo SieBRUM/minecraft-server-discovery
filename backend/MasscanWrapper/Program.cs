@@ -22,23 +22,25 @@ namespace MasscanWrapper
             p.OutputDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
             p.ErrorDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
             p.StartInfo.FileName = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/masscan.exe";
-            p.StartInfo.Arguments = "-p25565 0.0.0.0/0 --rate 69696 --exclude 255.255.255.255 --source-ip 192.168.1.200";
+            p.StartInfo.Arguments = "-p25565 0.0.0.0/0 --rate 69696 --exclude 255.255.255.255";
             stopwatch.Start();
             p.Start();
             p.BeginOutputReadLine();
             p.BeginErrorReadLine();
-            
 
-            while(true)
-            {
-                if(p.HasExited)
-                {
-                    Console.WriteLine("Restarting scanning process!");
-                    p.Start();
-                    p.BeginOutputReadLine();
-                    p.BeginErrorReadLine();
-                }
-            }
+
+            //while(true)
+            //{
+            //    if(p.HasExited)
+            //    {
+            //        Console.WriteLine("Restarting scanning process!");
+            //        p.Start();
+            //        p.BeginOutputReadLine();
+            //        p.BeginErrorReadLine();
+            //    }
+            //}
+
+            Console.ReadLine();
         }
 
         private static void MyProcOutputHandler(object sendingProcess,
@@ -54,7 +56,7 @@ namespace MasscanWrapper
                 else if (outLine.Data.Contains("Discovered"))
                 {
                     Console.WriteLine($"Hit! IP {IPAd.Match(outLine.Data)} has possible Minecraft server running!");
-                    $"https://localhost:44315/main/submit/{IPAd.Match(outLine.Data)}".AllowAnyHttpStatus().GetAsync();
+                    $"http://localhost:5000/main/submit/{IPAd.Match(outLine.Data)}".AllowAnyHttpStatus().GetAsync();
                 }
                 else if (outLine.Data.Contains("100.00% done"))
                 {
