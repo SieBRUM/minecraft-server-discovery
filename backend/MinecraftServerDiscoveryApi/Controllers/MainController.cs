@@ -37,7 +37,7 @@ namespace MinecraftServerDiscoveryApi.Controllers
                 return BadRequest();
             }
 
-            var minecraftServer = await _dbContext.Servers.FirstOrDefaultAsync(x => x.IpAddress == ip);
+            var minecraftServer = await _dbContext.Servers.Include(x => x.Players).Include(x => x.GeoInformation).FirstOrDefaultAsync(x => x.IpAddress == ip);
             var ms = new MineStat(ip, 25565);
 
             if(ms.ServerUp)
