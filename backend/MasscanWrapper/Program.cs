@@ -1,8 +1,8 @@
 ﻿using System;
-using Flurl.Http;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Flurl.Http;
 
 namespace MasscanWrapper
 {
@@ -22,13 +22,22 @@ namespace MasscanWrapper
             p.OutputDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
             p.ErrorDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
             p.StartInfo.FileName = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/masscan.exe";
-            p.StartInfo.Arguments = "-p25565 0.0.0.0/0 --rate 69696 --exclude 255.255.255.255";
+            p.StartInfo.Arguments = "-p25565 31.187.165.214 --rate 69696 --exclude 255.255.255.255";
             stopwatch.Start();
             p.Start();
             p.BeginOutputReadLine();
             p.BeginErrorReadLine();
+            
 
-            Console.ReadLine();
+            while(true)
+            {
+                if(p.HasExited)
+                {
+                    p.Start();
+                    p.BeginOutputReadLine();
+                    p.BeginErrorReadLine();
+                }
+            }
         }
 
         private static void MyProcOutputHandler(object sendingProcess,
@@ -46,13 +55,25 @@ namespace MasscanWrapper
                     Console.WriteLine($"Hit! IP {IPAd.Match(outLine.Data)} has possible Minecraft server running!");
                     $"https://localhost:44315/main/submit/{IPAd.Match(outLine.Data)}".AllowAnyHttpStatus().GetAsync();
                 }
-                else
+                else if (outLine.Data.Contains("100.00% done"))
                 {
-                    if(stopwatch.ElapsedMilliseconds > (5 * 1000))
+                    p.Kill();
+                    p.CancelErrorRead();
+                    p.CancelOutputRead();
+                    p.Close();
+                    Console.WriteLine("Done!");
+                }
+                else if(outLine.Data.StartsWith("rate:"))
+                {
+                    if (stopwatch.ElapsedMilliseconds > (5 * 1000))
                     {
                         Console.WriteLine(outLine.Data);
                         stopwatch.Restart();
                     }
+                }
+                else
+                {
+                    Console.WriteLine(outLine.Data);
                 }
             }
         }

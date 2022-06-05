@@ -56,6 +56,10 @@ namespace MinecraftServerDiscoveryApi.Controllers
                 else
                 {
                     Converters.MineStatToExistingServer(ms, ref minecraftServer);
+                    if(minecraftServer.GeoInformation == default)
+                    {
+                        await _dbContext.GeoInformation.AddAsync(minecraftServer.GeoInformation);
+                    }
                     await _dbContext.SaveChangesAsync();
                 }
 
