@@ -18,4 +18,7 @@ export class ApiService {
         return this.http.get<Array<IServer>>(`${this.API_URL}main/server`, { observe: 'response' });
     }
 
+    updateServer(ip: string): Observable<HttpResponse<IServer>> {
+        return this.http.get<IServer>(`${this.API_URL}main/submit/${ip}`, { observe: 'response' });
+    }
 }

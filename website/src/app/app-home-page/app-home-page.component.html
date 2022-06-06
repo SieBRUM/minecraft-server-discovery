@@ -1,28 +1,28 @@
-<table mat-table [dataSource]="servers">
+<table mat-table [dataSource]="servers" matSort>
 
-  <ng-container matColumnDef="ipport">
-    <th mat-header-cell *matHeaderCellDef> Ip address + port </th>
-    <td mat-cell *matCellDef="let element"> {{ element.ipAddress }}:{{ element.port }} </td>
+  <ng-container matColumnDef="ipport" class="ipport">
+    <th mat-header-cell *matHeaderCellDef class="ipport"> Ip address + port </th>
+    <td mat-cell *matCellDef="let element" class="ipport"> {{ element.ipAddress }}:{{ element.port }} </td>
   </ng-container>
 
   <ng-container matColumnDef="motd">
-    <th mat-header-cell *matHeaderCellDef> MOTD </th>
-    <td mat-cell *matCellDef="let element"> {{ element.motd }} </td>
+    <th mat-header-cell *matHeaderCellDef class="motd"> MOTD </th>
+    <td mat-cell *matCellDef="let element" class="motd"> {{ element.motd }} </td>
   </ng-container>
 
   <ng-container matColumnDef="players">
-    <th mat-header-cell *matHeaderCellDef> Players </th>
+    <th mat-header-cell *matHeaderCellDef (click)="onClickSortPlayers()" class="players"> Players </th>
     <td mat-cell *matCellDef="let element"> {{ element.currentAmountPlayers }} / {{ element.maxAmountPlayers }} </td>
   </ng-container>
 
   <ng-container matColumnDef="version">
-    <th mat-header-cell *matHeaderCellDef> Version </th>
-    <td mat-cell *matCellDef="let element"> {{ element.version }} </td>
+    <th mat-header-cell *matHeaderCellDef class="version"> Version </th>
+    <td mat-cell *matCellDef="let element" class="version"> {{ element.version }} </td>
   </ng-container>
 
   <ng-container matColumnDef="lastonline">
     <th mat-header-cell *matHeaderCellDef> Last online </th>
-    <td mat-cell *matCellDef="let element"> {{ element.lastSeenOnline }} </td>
+    <td mat-cell *matCellDef="let element"> {{ getDate(element.lastSeenOnline) }} </td>
   </ng-container>
 
   <ng-container matColumnDef="geocountry">
@@ -32,16 +32,18 @@
   </ng-container>
 
   <ng-container matColumnDef="maps">
-    <th mat-header-cell *matHeaderCellDef> Country </th>
+    <th mat-header-cell *matHeaderCellDef> Actions </th>
     <td mat-cell *matCellDef="let element">
-
       <button mat-icon-button color="primary" *ngIf="element.geoInformation"
         (click)="onClickMap(element.geoInformation.lat, element.geoInformation.lon)">
         <mat-icon>add_location</mat-icon>
       </button>
+      <button mat-icon-button color="primary" (click)="refreshInformation(element.id)">
+        <mat-icon>refresh</mat-icon>
+      </button>
     </td>
   </ng-container>
 
-  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
   <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>

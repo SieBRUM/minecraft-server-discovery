@@ -15,30 +15,44 @@ namespace MasscanWrapper
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Starting scanning process. Sleeping for 5 seconds to allow the API to start...");
-            Thread.Sleep(5000);
-            p.StartInfo.UseShellExecute = false;
-            p.StartInfo.RedirectStandardOutput = true;
-            p.StartInfo.RedirectStandardError = true;
-            p.OutputDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
-            p.ErrorDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
-            p.StartInfo.FileName = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/masscan.exe";
-            stopwatch.Start();
-
-            while (hasRan != IpRanges.Netherlands.Count)
+            try
             {
-                if(p.StartInfo.Arguments == "" || p.HasExited)
-                {
-                    Console.WriteLine($"Restarting scanning process on range {IpRanges.Netherlands[hasRan]}!");
-                    p.StartInfo.Arguments = $"-p25565 {IpRanges.Netherlands[hasRan]} --rate 10000000000 --exclude 255.255.255.255";
-                    hasRan++;
-                    p.Start();
-                    p.BeginOutputReadLine();
-                    p.BeginErrorReadLine();
-                }
-            }
+                Console.WriteLine("Starting scanning process. Sleeping for 5 seconds to allow the API to start...");
+                Thread.Sleep(5000);
+                p.StartInfo.UseShellExecute = false;
+                p.StartInfo.RedirectStandardOutput = true;
+                p.StartInfo.RedirectStandardError = true;
+                p.OutputDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
+                p.ErrorDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
+                p.StartInfo.FileName = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/masscan.exe";
+                stopwatch.Start();
 
-            Console.ReadLine();
+                while (hasRan != IpRanges.Netherlands.Count)
+                {
+                    if (p.StartInfo.Arguments == "" || p.HasExited)
+                    {
+                        Console.WriteLine($"Restarting scanning process on range {IpRanges.Netherlands[hasRan]}!");
+                        p.StartInfo.Arguments = $"-p25565 {IpRanges.Netherlands[hasRan]} --rate 10000000000 --exclude 255.255.255.255";
+                        hasRan++;
+                        p.Start();
+                        p.BeginOutputReadLine();
+                        p.BeginErrorReadLine();
+                    }
+                }
+
+                Console.ReadLine();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.Source);
+                Console.WriteLine(ex.Data);
+                Console.WriteLine(ex.StackTrace);
+                Console.WriteLine(ex.InnerException);
+                Console.ReadLine();
+                Console.ReadKey();
+            }
         }
 
         private static void MyProcOutputHandler(object sendingProcess,

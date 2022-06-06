@@ -1,3 +1,35 @@
 table {
   width: 100%;
 }
+
+
+.mat-row .mat-cell {
+  border-bottom: 1px solid transparent;
+  border-top: 1px solid transparent;
+  cursor: pointer;
+}
+
+
+.mat-row:hover .mat-cell {
+  border-color: currentColor;
+}
+
+.ipport {
+  width: 200px;
+  padding-right: 50px;
+}
+
+.motd {
+  width: 500px;
+  overflow: hidden;
+  padding-right: 50px;
+}
+
+.version {
+  width: 100px;
+  padding-right: 50px;
+}
+
+.players {
+  cursor: pointer;
+}
