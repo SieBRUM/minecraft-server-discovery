@@ -8,7 +8,7 @@ namespace MasscanWrapper
 {
     class Program
     {
-        static readonly Process p = new Process();
+        static Process p;
         static readonly Regex IPAd = new Regex(@"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b");
         static readonly Stopwatch stopwatch = new Stopwatch();
         static int hasRan = 0;
@@ -18,19 +18,20 @@ namespace MasscanWrapper
             try
             {
                 Console.WriteLine("Starting scanning process. Sleeping for 5 seconds to allow the API to start...");
-                Thread.Sleep(5000);
-                p.StartInfo.UseShellExecute = false;
-                p.StartInfo.RedirectStandardOutput = true;
-                p.StartInfo.RedirectStandardError = true;
-                p.OutputDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
-                p.ErrorDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
-                p.StartInfo.FileName = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/masscan.exe";
                 stopwatch.Start();
 
                 while (hasRan != IpRanges.Netherlands.Count)
                 {
-                    if (p.StartInfo.Arguments == "" || p.HasExited)
+                    if (p == default || p.StartInfo.Arguments == "")
                     {
+                        p = new Process();
+                        Thread.Sleep(5000);
+                        p.StartInfo.UseShellExecute = false;
+                        p.StartInfo.RedirectStandardOutput = true;
+                        p.StartInfo.RedirectStandardError = true;
+                        p.OutputDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
+                        p.ErrorDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
+                        p.StartInfo.FileName = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/masscan.exe";
                         Console.WriteLine($"Restarting scanning process on range {IpRanges.Netherlands[hasRan]}!");
                         p.StartInfo.Arguments = $"-p25565 {IpRanges.Netherlands[hasRan]} --rate 10000000000 --exclude 255.255.255.255";
                         hasRan++;
@@ -77,6 +78,7 @@ namespace MasscanWrapper
                     p.CancelOutputRead();
                     p.Close();
                     Console.WriteLine("Done!");
+                    p = default;
                 }
                 else if(outLine.Data.StartsWith("rate:"))
                 {
