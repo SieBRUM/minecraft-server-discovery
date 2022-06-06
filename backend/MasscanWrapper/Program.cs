@@ -11,6 +11,7 @@ namespace MasscanWrapper
         static readonly Process p = new Process();
         static readonly Regex IPAd = new Regex(@"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b");
         static readonly Stopwatch stopwatch = new Stopwatch();
+        static int hasRan = 0;
 
         static void Main(string[] args)
         {
@@ -22,23 +23,20 @@ namespace MasscanWrapper
             p.OutputDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
             p.ErrorDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
             p.StartInfo.FileName = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/masscan.exe";
-            p.StartInfo.Arguments = "-p25565 0.0.0.0/0 --rate 1000 --exclude 255.255.255.255";
             stopwatch.Start();
-            p.Start();
-            p.BeginOutputReadLine();
-            p.BeginErrorReadLine();
 
-
-            //while(true)
-            //{
-            //    if(p.HasExited)
-            //    {
-            //        Console.WriteLine("Restarting scanning process!");
-            //        p.Start();
-            //        p.BeginOutputReadLine();
-            //        p.BeginErrorReadLine();
-            //    }
-            //}
+            while (hasRan != IpRanges.Netherlands.Count)
+            {
+                if(p.StartInfo.Arguments == "" || p.HasExited)
+                {
+                    Console.WriteLine($"Restarting scanning process on range {IpRanges.Netherlands[hasRan]}!");
+                    p.StartInfo.Arguments = $"-p25565 {IpRanges.Netherlands[hasRan]} --rate 10000000000 --exclude 255.255.255.255";
+                    hasRan++;
+                    p.Start();
+                    p.BeginOutputReadLine();
+                    p.BeginErrorReadLine();
+                }
+            }
 
             Console.ReadLine();
         }

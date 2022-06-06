@@ -16,7 +16,7 @@ namespace MinecraftServerDiscoveryApi.Controllers
     public class MainController : ControllerBase
     {
         private readonly DatabaseContext _dbContext;
-        private readonly Regex ipRegex = new Regex(@"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b");
+        private readonly Regex ipRegex = new(@"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b");
 
         public MainController(DatabaseContext context)
         {
@@ -46,8 +46,12 @@ namespace MinecraftServerDiscoveryApi.Controllers
                 {
                     minecraftServer = Converters.MineStatToNewServer(ms);
                     await GeoLocationHelper.SetGeoData(minecraftServer);
-                    await _dbContext.GeoInformation.AddAsync(minecraftServer.GeoInformation);
-                    await _dbContext.SaveChangesAsync();
+                    if(minecraftServer.GeoInformation != default)
+                    {
+                        await _dbContext.GeoInformation.AddAsync(minecraftServer.GeoInformation);
+                        await _dbContext.SaveChangesAsync();
+                    }
+
                     await _dbContext.Servers.AddAsync(minecraftServer);
                     await _dbContext.SaveChangesAsync();
                 }

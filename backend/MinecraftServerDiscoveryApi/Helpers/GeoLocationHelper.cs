@@ -2,6 +2,7 @@
 using Flurl.Http;
 using System.Threading.Tasks;
 using MinecraftServerDiscoveryApi.DTO;
+using System;
 
 namespace MinecraftServerDiscoveryApi.Helpers
 {
@@ -9,9 +10,15 @@ namespace MinecraftServerDiscoveryApi.Helpers
     {
         public async static Task SetGeoData(Server server)
         {
-            var extGeoInfo = await $"http://ip-api.com/json/{server.IpAddress}".AllowAnyHttpStatus().GetJsonAsync<ExternalGeoLocationInformation>();
-
-            server.GeoInformation = Converters.ExternalGeoInformationToNewGeoInformation(extGeoInfo);
+            try
+            {
+                var extGeoInfo = await $"http://ip-api.com/json/{server.IpAddress}".AllowAnyHttpStatus().GetJsonAsync<ExternalGeoLocationInformation>();
+                server.GeoInformation = Converters.ExternalGeoInformationToNewGeoInformation(extGeoInfo);
+            }
+            catch (Exception)
+            {
+                // Ratelimit by geoInfo. 
+            }
         }
     }
 }
