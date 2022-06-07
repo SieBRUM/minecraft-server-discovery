@@ -7,6 +7,25 @@ Website example:
 Scanner example:
 ![image](https://user-images.githubusercontent.com/14212955/172442759-df75ffd9-8986-448c-8cfb-1ac2398d7997.png)
 
+All data fields saved in database:
+- IP address
+- Port
+- Messsage of the day (motd) (message visible when viewing server in server browser)
+- Minecraft server version (including modded)
+- Current amount of players
+- Max amount of players
+- Latency (from API location to minecraft server)
+- First discovered date
+- Last seen online date
+- Sample of players (currently not working)
+- Continent of server
+- Country of server
+- Region name of server
+- Zipcode of server
+- Latitude of server
+- Longitude of server
+- Isp of server
+- Timezone of server
 
 ## Frontend
 The frontend is written in Angular and is very basic with basic functionality. It has the option to refresh the data of a specific server and open the geo-location of the server on Google Maps. You are able to click on the 'players' header to sort based on active players.
