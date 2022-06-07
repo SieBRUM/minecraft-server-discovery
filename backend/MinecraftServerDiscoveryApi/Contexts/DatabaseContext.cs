@@ -17,8 +17,13 @@ namespace MinecraftServerDiscoveryApi.Contexts
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var connectionString = "server=127.0.0.1;user=root;password=DiscoverTheseNuts;database=minecraftdiscoverytool";
-            optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+            var dbString = Environment.GetEnvironmentVariable("MINECRAFT_DISCOVERY_DB");
+            if (string.IsNullOrWhiteSpace(dbString))
+            {
+                throw new MissingFieldException("Database environment variable not found.");
+            }
+
+            optionsBuilder.UseMySql(dbString, ServerVersion.AutoDetect(dbString));
             optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
             optionsBuilder.EnableSensitiveDataLogging();
             optionsBuilder.EnableDetailedErrors();
