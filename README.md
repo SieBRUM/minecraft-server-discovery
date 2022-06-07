@@ -49,3 +49,11 @@ To run the API, simply build the project and execute the exe. Make sure to have 
 - [ ] Detect if NpCap (or something similar) is installed
 - [ ] Fix the player list (as of right now, the players are not received. This should be fixed in the package that is used
 - [ ] Add more default lists
+
+
+## Credits
+SieBRUM
+
+https://github.com/robertdavidgraham/masscan
+
+https://github.com/FragLand/minestat
