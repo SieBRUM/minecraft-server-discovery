@@ -72,6 +72,20 @@ namespace MasscanWrapper
             "195.241.0.0/16"
         };
 
+        private static readonly List<string> wholeInternet = new List<string>()
+        {
+            "0.0.0.0/0"
+        };
+
+        public static Dictionary<string, List<string>> DefaultIpRanges { get; } = new Dictionary<string, List<string>>()
+        {
+            { "Common Netherlands IP adresses", netherlands },
+            { "Whole internet", wholeInternet },
+            { "Test list (debug list)", testList },
+        };
+
+
+        // To quickly debug code and multiple iterations.
         private static readonly List<string> testList = new List<string>()
         {
             "77.160.0.0",
@@ -80,12 +94,6 @@ namespace MasscanWrapper
             "109.32.0.0",
             "92.64.0.0",
             "87.208.0.0",
-        };
-
-        public static Dictionary<string, List<string>> DefaultIpRanges { get; } = new Dictionary<string, List<string>>()
-        {
-            { "Common Netherlands IP adresses", netherlands },
-            { "Test list", testList },
         };
     }
 }
