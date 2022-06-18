@@ -1,8 +1,6 @@
 # minecraft-server-discovery
 Tool to discover minecraft serves on the internet all over the world and visualize them on a website.
 
-Example website (with real data): http://85.215.166.103/home
-
 Website example: 
 ![image](https://user-images.githubusercontent.com/14212955/172442508-b72047e5-18b6-4932-9b73-94073c8d0cb7.png)
 Scanner example:
