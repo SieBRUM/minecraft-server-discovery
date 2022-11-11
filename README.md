@@ -47,6 +47,9 @@ To run the API, simply build the project and execute the exe. Make sure to have 
 - [ ] Detect if NpCap (or something similar) is installed
 - [ ] Fix the player list (as of right now, the players are not received. This should be fixed in the package that is used
 - [ ] Add more default lists
+- [ ] Add the ability to pass arguments to the Wrapper
+- [ ] Add docker container with all of the stuff setup
+- [ ] Make .NET versions consistent
 
 
 ## Credits
