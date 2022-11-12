@@ -78,7 +78,7 @@ namespace MasscanWrapper
 
 
             ConsoleWriteColor("Setup all done!", ConsoleColor.Green);
-            ConsoleWriteColor("Starting scaning process...", ConsoleColor.Green);
+            ConsoleWriteColor("Starting scanning process...", ConsoleColor.Green);
             stopwatch.Start();
 
             do
