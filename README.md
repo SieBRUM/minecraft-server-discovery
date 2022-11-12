@@ -1,6 +1,11 @@
 # minecraft-server-discovery
 Tool to discover minecraft serves on the internet all over the world and visualize them on a website.
 
+## SETUP
+- [Setup using docker (easiest)](#docker)
+- [Setup frontend (no docker)](#frontend)
+- [Setup backend (no docker)](#backend)
+
 Website example: 
 ![image](https://user-images.githubusercontent.com/14212955/172442508-b72047e5-18b6-4932-9b73-94073c8d0cb7.png)
 Scanner example:
@@ -39,6 +44,13 @@ To run the scanner, simply build the project and execute the exe
 
 The API tries to connect to the Minecraft server, and extracts as much info as possible from the server. The server and geo-location get saved in a Database.
 To run the API, simply build the project and execute the exe. Make sure to have the environment variable "MINECRAFT_DISCOVERY_DB" set on your machine and have the value be a valid connection string to a MySQL database.
+
+## Docker
+- Clone the repository (or pull the new version)
+- Open terminal in root of the repository
+- Execute `docker-compose up` (the backend should crash a couple of times, this is because it takes like ~20 seconds to setup the DB container. Just give it some time, it restarts automatically) (you can remove everything with `docker-compose down -v` and remove the images)
+- Everything should be running (frontend: `localhost:80`, backend: `localhost:5000`)
+- You can now start the Wrapper on your machine (same machine as you just ran these commands on
 
 ## TODO
 - [ ] Change the SUBMIT endpoint to a messagebus so it's all more efficient
