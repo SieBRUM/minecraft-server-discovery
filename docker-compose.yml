@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+  api:
+    container_name: api-container
+    restart: always
+    build: ./backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mysql_db
+    links:
+      - mysql_db
+    networks:
+      - all
+  webapp:
+    container_name: webapp-container
+    restart: always
+    build: ./website
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    links:
+      - api
+    networks:
+      - all
+  mysql_db:
+    container_name: mysql-container
+    image: mysql:latest
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: 'minecraftdiscoverytool'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'my-secret-password' # Please change this and also change it in /backend/Dockerfile
+      MYSQL_ROOT_PASSWORD: 'my-secret-password' # Please change this and also change it in /backend/Dockerfile
+    networks:
+      - all
+networks:
+  all:
+    driver: bridge

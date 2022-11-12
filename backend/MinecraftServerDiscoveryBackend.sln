@@ -5,7 +5,12 @@ VisualStudioVersion = 16.0.31321.278
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasscanWrapper", "MasscanWrapper\MasscanWrapper.csproj", "{FFBF0D10-3FA1-4AF8-BEA2-DD7685DF92CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinecraftServerDiscoveryApi", "MinecraftServerDiscoveryApi\MinecraftServerDiscoveryApi.csproj", "{E6793C2A-FEAD-4534-AFDB-28A3DFE07AD4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinecraftServerDiscoveryApi", "MinecraftServerDiscoveryApi\MinecraftServerDiscoveryApi.csproj", "{E6793C2A-FEAD-4534-AFDB-28A3DFE07AD4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EDD11588-F658-4DD2-8CFE-34CC65A6FCAE}"
+	ProjectSection(SolutionItems) = preProject
+		Dockerfile = Dockerfile
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
