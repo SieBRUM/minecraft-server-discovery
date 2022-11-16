@@ -1,5 +1,5 @@
 # minecraft-server-discovery
-Tool to discover minecraft serves on the internet all over the world and visualize them on a website.
+Tool to discover minecraft servers on the internet all over the world and visualize them on a website.
 
 ## SETUP
 - [Setup using docker (easiest)](#docker)
