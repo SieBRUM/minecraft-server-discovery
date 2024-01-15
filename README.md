@@ -48,7 +48,9 @@ To run the API, simply build the project and execute the exe. Make sure to have 
 ## Docker
 - Clone the repository (or pull the new version)
 - Open terminal in root of the repository
-- Execute `docker-compose up` (the backend should crash a couple of times, this is because it takes like ~20 seconds to setup the DB container. Just give it some time, it restarts automatically) (you can remove everything with `docker-compose down -v` and remove the images)
+- Compose the containers (the backend should crash a couple of times, this is because it takes like ~20 seconds to setup the DB container. Just give it some time, it restarts automatically)
+  - Execute `docker-compose up`  (you can remove everything with `docker-compose down -v` and remove the images) OR 
+  - Execute `sudo docker compose build --no-cache && sudo docker compose up --force-recreate` (you can remove everything with `sudo docker compose down -v` and remove the images)
 - Everything should be running (frontend: `localhost:80`, backend: `localhost:5000`)
 - You can now start the Wrapper on your machine (same machine as you just ran these commands on
 
