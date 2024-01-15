@@ -1,8 +1,9 @@
-#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+# See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+# Change the ENV variable on line 6 to your own!
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
 WORKDIR /app
-ENV MINECRAFT_DISCOVERY_DB server=host.docker.internal;user=root;password=my-secret-password;database=minecraftdiscoverytool # CHANGE THIS TO YOUR OWN CONNECTION STRING
+ENV MINECRAFT_DISCOVERY_DB server=mysql-container;user=root;password=my-secret-password;database=minecraftdiscoverytool
 EXPOSE 5000
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
