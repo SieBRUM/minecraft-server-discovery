@@ -5,7 +5,7 @@ Tool to discover minecraft servers on the internet all over the world and visual
 - [Setup using docker (easiest)](#docker)
 - [Setup frontend (no docker)](#frontend)
 - [Setup backend (no docker)](#backend)
-- [Setup Scanner (no docker)](#backend)
+- [Setup Scanner (no docker AND docker)](#backend)
 
 Website example: 
 ![image](https://user-images.githubusercontent.com/14212955/172442508-b72047e5-18b6-4932-9b73-94073c8d0cb7.png)
@@ -41,7 +41,7 @@ The backend is split up in two different projects; the scanner and the API.
 
 The scanner is setup to be easy to use. It guides the user through a couple of questions to setup the scanner. Once the setup is done, it will start scanning all the given IP ranges.
 When the scanner finds an IP with port 25565 open, it will send a GET request to the API. To run the scanner on the whole internet, use IP range "0.0.0.0/0".
-To run the scanner, simply build the project and execute the exe
+To run the scanner, simply build the project and execute the exe. YOU NEED TO MANUALLY START THE SCANNER EVEN WHEN USING DOCKER TO SETUP THE OTHER PARTS.
 
 The API tries to connect to the Minecraft server, and extracts as much info as possible from the server. The server and geo-location get saved in a Database.
 To run the API, simply build the project and execute the exe. Make sure to have the environment variable "MINECRAFT_DISCOVERY_DB" set on your machine and have the value be a valid connection string to a MySQL database.
