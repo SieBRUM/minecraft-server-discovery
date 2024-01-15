@@ -61,9 +61,10 @@ To run the API, simply build the project and execute the exe. Make sure to have 
 - [ ] Add more functionality to front-end, like filters
 - [ ] Detect OS in scanner and point to non-exe file when it's not Windows
 - [ ] Detect if NpCap (or something similar) is installed
-- [ ] Fix the player list (as of right now, the players are not received. This should be fixed in the package that is used
+- [ ] Fix the player list (as of right now, the players are not received. This should be fixed in the package that is used)
 - [ ] Add more default lists
 - [ ] Add the ability to pass arguments to the Wrapper
+- [ ] Containerize the wrapper/scanner (research best way to pass arguments etc)
 - [X] Add docker container with all of the stuff setup
 - [X] Make .NET versions consistent
 
