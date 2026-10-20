@@ -78,9 +78,12 @@ foreach (var o in probeOptions.Concat<Option>([editionOption, onlineOnlyOption, 
 
 var geoCommand = new Command("geoip-update", "Download the DB-IP Lite GeoIP databases") { forceOption };
 
+var backupOutOption = new Option<string?>("--out") { Description = "Backup file to create [default: backups/mcdiscovery-<timestamp>.db next to the database]" };
+var backupCommand = new Command("backup", "Make a consistent copy of the database while the API and scanner keep running") { backupOutOption };
+
 var root = new RootCommand("Minecraft server discovery scanner (research tool). See README.md.")
 {
-    dbOption, geoDirOption, verboseOption, scanCommand, rescanCommand, geoCommand,
+    dbOption, geoDirOption, verboseOption, scanCommand, rescanCommand, geoCommand, backupCommand,
 };
 
 // ---------------------------------------------------------------------------------------------------------
@@ -208,6 +211,31 @@ geoCommand.SetAction(async (parse, ct) =>
     await GeoIpUpdater.UpdateAsync(dir, parse.GetValue(forceOption), log, ct);
     using var geo = GeoIpService.Open(dir, log);
     return geo.Available ? 0 : 1;
+});
+
+backupCommand.SetAction(async (parse, ct) =>
+{
+    using var loggerFactory = CreateLoggerFactory(parse.GetValue(verboseOption));
+    var log = loggerFactory.CreateLogger("backup");
+    var source = Database.ResolvePath(parse.GetValue(dbOption));
+    if (!File.Exists(source))
+    {
+        log.LogError("Database {Path} does not exist", source);
+        return 1;
+    }
+
+    var target = parse.GetValue(backupOutOption) is { Length: > 0 } outPath
+        ? Path.GetFullPath(outPath)
+        : Path.Combine(Path.GetDirectoryName(source) ?? ".", "backups", $"mcdiscovery-{DateTime.UtcNow:yyyyMMdd-HHmmss}.db");
+    if (File.Exists(target))
+    {
+        log.LogError("{Path} already exists", target);
+        return 1;
+    }
+
+    await Database.BackupAsync(source, target, ct);
+    log.LogInformation("Backup written to {Path} ({Size:N0} bytes)", target, new FileInfo(target).Length);
+    return 0;
 });
 
 return await root.Parse(args).InvokeAsync();

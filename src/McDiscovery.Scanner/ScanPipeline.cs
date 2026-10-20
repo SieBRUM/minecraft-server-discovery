@@ -53,6 +53,7 @@ public sealed class ScanPipeline(ScanSettings settings, ILoggerFactory loggerFac
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger<ScanPipeline>();
     private readonly DbContextOptions<AppDbContext> _dbOptions = Database.CreateOptions(settings.DatabasePath);
+    private volatile bool _masscanFellBack;
 
     public async Task InitializeDatabaseAsync(CancellationToken ct)
     {
@@ -175,6 +176,8 @@ public sealed class ScanPipeline(ScanSettings settings, ILoggerFactory loggerFac
             or System.ComponentModel.Win32Exception)
         {
             _logger.LogWarning("masscan failed ({Error}); falling back to the connect scanner", e.Message);
+            progress.AddTotal(-targets.Count * settings.JavaPorts.Count); // the connect scanner counts them again
+            _masscanFellBack = true;
             await connect.RunAsync(targets, settings.JavaPorts, onFound, progress, ct);
         }
     }
@@ -191,6 +194,7 @@ public sealed class ScanPipeline(ScanSettings settings, ILoggerFactory loggerFac
         var writer = new IngestWriter(_dbOptions, geo);
         var prober = new ServerProber(settings.Probe, loggerFactory.CreateLogger<ServerProber>());
 
+        _masscanFellBack = false;
         var run = new ScanRun
         {
             Kind = kind,
@@ -311,6 +315,11 @@ public sealed class ScanPipeline(ScanSettings settings, ILoggerFactory loggerFac
 
         var completed = !ct.IsCancellationRequested && producerError is null;
         run.FinishedUtc = DateTime.UtcNow;
+        if (_masscanFellBack)
+        {
+            run.Engine = run.Engine.Replace("masscan", "connect", StringComparison.Ordinal) + " (masscan failed)";
+        }
+
         run.OpenPorts = progress.Found;
         run.ServersOnline = online;
         run.NewServers = created;

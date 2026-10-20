@@ -54,6 +54,28 @@ public static class Database
         await db.Database.MigrateAsync(ct);
         await db.Database.ExecuteSqlRawAsync("PRAGMA journal_mode=WAL;", ct);
     }
+
+    /// <summary>
+    /// Copies the database with SQLite's online backup API: consistent even while other processes write,
+    /// unlike copying the file (which can miss data that is still in the WAL file).
+    /// </summary>
+    public static async Task BackupAsync(string sourcePath, string targetPath, CancellationToken ct = default)
+    {
+        var dir = Path.GetDirectoryName(Path.GetFullPath(targetPath));
+        if (!string.IsNullOrEmpty(dir))
+        {
+            Directory.CreateDirectory(dir);
+        }
+
+        await using var source = new SqliteConnection(BuildConnectionString(sourcePath));
+        await using var target = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = targetPath, Pooling = false }.ToString());
+        await source.OpenAsync(ct);
+        await target.OpenAsync(ct);
+        source.BackupDatabase(target);
+        await using var cmd = target.CreateCommand();
+        cmd.CommandText = "PRAGMA journal_mode=DELETE;"; // a self-contained single file
+        await cmd.ExecuteNonQueryAsync(ct);
+    }
 }
 
 /// <summary>Used by <c>dotnet ef</c> when adding migrations.</summary>

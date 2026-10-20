@@ -1,0 +1,10 @@
+# Targets for the scanner: one IPv4 address, CIDR or range per line. '#' starts a comment.
+# The scanner does nothing until at least one target is listed here.
+#
+# Only scan networks you are allowed to scan, and respect opt-out requests (add them to exclude.txt).
+#
+# Examples:
+#   192.0.2.0/24
+#   198.51.100.10-198.51.100.20
+#   203.0.113.5
+#   0.0.0.0/0          # the whole IPv4 internet (minus exclude.txt and reserved ranges)

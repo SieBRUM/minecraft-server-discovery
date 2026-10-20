@@ -1,0 +1,35 @@
+Minecraft Server Discovery
+Copyright 2022-2026 SieBRUM and contributors
+https://github.com/SieBRUM/minecraft-server-discovery
+
+This product includes software developed as part of the Minecraft Server
+Discovery project. Under section 4(d) of the Apache License, Version 2.0, any
+redistribution or derivative work must keep this NOTICE file (or an equivalent
+notice in its documentation or user interface) and so credit this project.
+
+-------------------------------------------------------------------------------
+Third-party components and data
+-------------------------------------------------------------------------------
+
+IP geolocation data (downloaded at runtime, not distributed with this source):
+  DB-IP Lite databases by DB-IP.com, licensed under the Creative Commons
+  Attribution 4.0 International License (https://db-ip.com,
+  https://creativecommons.org/licenses/by/4.0/). Attribution "IP Geolocation by
+  DB-IP" is shown in the website footer.
+
+masscan (installed into the scanner Docker image from the Ubuntu archive):
+  Copyright Robert David Graham, AGPL-3.0, https://github.com/robertdavidgraham/masscan
+  Used as a separate program; it is not linked into this project's code.
+
+Map tiles: (c) OpenStreetMap contributors, https://www.openstreetmap.org/copyright
+
+Libraries (see their own licenses): .NET, ASP.NET Core and Entity Framework Core
+(MIT), MaxMind.Db (Apache-2.0), System.CommandLine (MIT), Angular and Angular
+Material (MIT), Leaflet (BSD-2-Clause), Chart.js (MIT), RxJS (Apache-2.0).
+
+The original version of this project used MineStat
+(https://github.com/FragLand/minestat, GPL-3.0); this rewrite contains its own
+protocol implementation and no MineStat code.
+
+Minecraft is a trademark of Mojang Synergies AB. This project is not affiliated
+with Mojang or Microsoft.

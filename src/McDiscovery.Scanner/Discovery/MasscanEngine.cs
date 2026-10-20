@@ -76,7 +76,7 @@ public sealed partial class MasscanEngine(DiscoveryOptions options, ILogger<Mass
             process.Start();
             process.StandardInput.Close();
 
-            var stderr = PumpStderrAsync(process.StandardError, progress);
+            var stderr = PumpStderrAsync(process.StandardError, progress, targets.Count * ports.Count);
             try
             {
                 string? line;
@@ -105,8 +105,12 @@ public sealed partial class MasscanEngine(DiscoveryOptions options, ILogger<Mass
                 }
             }
 
-            var errors = await stderr;
-            if (process.ExitCode != 0 && !ct.IsCancellationRequested)
+            var (errors, reported) = await stderr;
+            if (process.ExitCode == 0)
+            {
+                progress.AddSent(targets.Count * ports.Count - reported); // the last status line is rarely exactly 100%
+            }
+            else if (!ct.IsCancellationRequested)
             {
                 throw new InvalidOperationException(
                     $"masscan exited with code {process.ExitCode}. Last output: {string.Join(" | ", errors)}. " +
@@ -119,7 +123,7 @@ public sealed partial class MasscanEngine(DiscoveryOptions options, ILogger<Mass
             {
                 workDir.Delete(recursive: true);
             }
-            catch (IOException)
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
             {
                 // best effort
             }
@@ -165,9 +169,10 @@ public sealed partial class MasscanEngine(DiscoveryOptions options, ILogger<Mass
         return false;
     }
 
-    private async Task<List<string>> PumpStderrAsync(StreamReader reader, DiscoveryProgress progress)
+    private async Task<(List<string> Tail, long Reported)> PumpStderrAsync(StreamReader reader, DiscoveryProgress progress, long total)
     {
         var tail = new Queue<string>();
+        long reported = 0;
         string? line;
         while ((line = await reader.ReadLineAsync()) is not null)
         {
@@ -177,6 +182,17 @@ public sealed partial class MasscanEngine(DiscoveryOptions options, ILogger<Mass
                 if (part.StartsWith("rate:", StringComparison.Ordinal))
                 {
                     progress.ExternalStatus = part;
+                    // "rate:  9.98-kpps, 12.34% done, ..." → translate into the shared "sent" counter.
+                    if (ParsePercentDone(part) is { } percent)
+                    {
+                        var sent = (long)(total * Math.Clamp(percent, 0, 100) / 100);
+                        if (sent > reported)
+                        {
+                            progress.AddSent(sent - reported);
+                            reported = sent;
+                        }
+                    }
+
                     continue;
                 }
 
@@ -189,8 +205,19 @@ public sealed partial class MasscanEngine(DiscoveryOptions options, ILogger<Mass
             }
         }
 
-        return [.. tail];
+        return ([.. tail], reported);
     }
+
+    internal static double? ParsePercentDone(string status)
+    {
+        var match = PercentRegex().Match(status);
+        return match.Success && double.TryParse(match.Groups[1].ValueSpan, NumberStyles.Float, CultureInfo.InvariantCulture, out var v)
+            ? v
+            : null;
+    }
+
+    [GeneratedRegex(@"(\d+(?:\.\d+)?)% done")]
+    private static partial Regex PercentRegex();
 
     [GeneratedRegex(@"^Discovered open port (\d{1,5})/tcp on (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s*$")]
     private static partial Regex DiscoveredRegex();

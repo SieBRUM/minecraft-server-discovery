@@ -138,6 +138,8 @@ public class ScanPipelineTests
         Assert.True(MasscanEngine.TryParseDiscovered("Discovered open port 25565/tcp on 1.2.3.4      ", out _));
         Assert.False(MasscanEngine.TryParseDiscovered("Discovered open port 19132/udp on 1.2.3.4", out _));
         Assert.False(MasscanEngine.TryParseDiscovered("rate:  0.00-kpps, 100.00% done", out _));
+        Assert.Equal(12.34, MasscanEngine.ParsePercentDone("rate:  9.98-kpps, 12.34% done,   1:02:03 remaining, found=5"));
+        Assert.Null(MasscanEngine.ParsePercentDone("waiting 3-secs"));
         Assert.False(MasscanEngine.TryParseDiscovered("Discovered open port 25565/tcp on 1.2.3.4; rm -rf /", out _));
 
         var engine = new MasscanEngine(new DiscoveryOptions { Rate = 5000, Seed = 7, MasscanAdapter = "eth0", MasscanExtraArgs = ["--ttl", "64"] },

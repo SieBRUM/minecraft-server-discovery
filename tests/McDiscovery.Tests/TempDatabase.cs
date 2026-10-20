@@ -36,9 +36,9 @@ public sealed class TempDatabase : IAsyncDisposable
         {
             System.IO.Directory.Delete(Directory, recursive: true);
         }
-        catch (IOException)
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
-            // best effort
+            // best effort (Windows may still hold a lock for a moment)
         }
 
         return ValueTask.CompletedTask;

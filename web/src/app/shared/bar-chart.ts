@@ -15,13 +15,20 @@ Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip);
 @Component({
   selector: 'app-bar-chart',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<div class="wrap" [style.height.px]="height()">
-    <canvas #canvas [attr.aria-label]="label()" role="img"></canvas>
-  </div>`,
+  template: `@if (!labels().length) {
+      <p class="empty">No data yet</p>
+    }
+    <div class="wrap" [hidden]="!labels().length" [style.height.px]="height()">
+      <canvas #canvas [attr.aria-label]="label()" role="img"></canvas>
+    </div>`,
   styles: `
     .wrap {
       position: relative;
       width: 100%;
+    }
+    .empty {
+      opacity: 0.6;
+      margin: 8px 0;
     }
   `,
 })
