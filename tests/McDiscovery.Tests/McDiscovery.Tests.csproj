@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <!-- Test code: relax rules that only make sense for shipped code. -->
+    <NoWarn>$(NoWarn);CA1707;CA1001;CA2000;CA1861;CA5394;CA1822;CA1859</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\McDiscovery.Core\McDiscovery.Core.csproj" />
+    <ProjectReference Include="..\..\src\McDiscovery.Protocol\McDiscovery.Protocol.csproj" />
+    <ProjectReference Include="..\..\src\McDiscovery.Scanner\McDiscovery.Scanner.csproj" />
+    <ProjectReference Include="..\..\src\McDiscovery.Api\McDiscovery.Api.csproj" />
+    <ProjectReference Include="..\McDiscovery.FakeServer\McDiscovery.FakeServer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>
