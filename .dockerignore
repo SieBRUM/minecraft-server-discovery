@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+**/.angular/
+**/*.db
+**/*.db-*
+**/*.mmdb
+.git/
+.github/
+data/
+.env
+docker-compose*.yml

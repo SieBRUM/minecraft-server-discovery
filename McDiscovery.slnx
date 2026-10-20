@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/McDiscovery.Api/McDiscovery.Api.csproj" />
+    <Project Path="src/McDiscovery.Core/McDiscovery.Core.csproj" />
+    <Project Path="src/McDiscovery.Protocol/McDiscovery.Protocol.csproj" />
+    <Project Path="src/McDiscovery.Scanner/McDiscovery.Scanner.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/McDiscovery.FakeServer/McDiscovery.FakeServer.csproj" />
+    <Project Path="tests/McDiscovery.Tests/McDiscovery.Tests.csproj" />
+  </Folder>
+</Solution>

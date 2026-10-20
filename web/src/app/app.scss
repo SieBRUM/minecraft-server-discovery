@@ -1,0 +1,48 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  gap: 16px;
+  flex-wrap: wrap;
+  height: auto;
+  min-height: 64px;
+}
+
+.brand {
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+nav a.active {
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+}
+
+main {
+  flex: 1;
+  padding: 16px;
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+footer {
+  padding: 12px 16px;
+  font-size: 12px;
+  opacity: 0.7;
+  text-align: center;
+}

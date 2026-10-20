@@ -1,42 +1,102 @@
-version: '3.8'
+# Minecraft Server Discovery: website + API, scanner and (optional) periodic rescanner.
+#
+#   docker compose up -d --build          start everything (the scanner idles until config/targets.txt has targets)
+#   docker compose logs -f scanner        follow the scanner
+#   docker compose run --rm scanner rescan --online-only   one-off re-probe of known servers (API keeps running)
+#   docker compose restart scanner        restart the scan after editing config/targets.txt
+#
+# Settings: copy .env.example to .env. By default the website/API is only reachable from this machine.
+name: mcdiscovery
+
 services:
   api:
-    container_name: api-container
-    restart: always
-    build: ./backend
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    image: mcdiscovery-api:local
+    restart: unless-stopped
     ports:
-      - "5000:5000"
-    depends_on:
-      - mysql_db
-    links:
-      - mysql_db
-    networks:
-      - all
-  webapp:
-    container_name: webapp-container
-    restart: always
-    build: ./website
-    ports:
-      - "80:80"
-    depends_on:
-      - api
-    links:
-      - api
-    networks:
-      - all
-  mysql_db:
-    container_name: mysql-container
-    image: mysql:latest
-    restart: always
-    ports:
-      - "3306:3306"
+      # Bound to localhost unless MCD_BIND_ADDRESS is changed (e.g. 0.0.0.0 to expose it).
+      - "${MCD_BIND_ADDRESS:-127.0.0.1}:${MCD_PORT:-8080}:8080"
     environment:
-      MYSQL_DATABASE: 'minecraftdiscoverytool'
-      MYSQL_USER: 'user'
-      MYSQL_PASSWORD: 'my-secret-password' # Please change this and also change it in /backend/Dockerfile
-      MYSQL_ROOT_PASSWORD: 'my-secret-password' # Please change this and also change it in /backend/Dockerfile
-    networks:
-      - all
-networks:
-  all:
-    driver: bridge
+      # Docker publishes ports through its bridge, so local requests arrive from a private address.
+      # Only loopback and private networks are allowed by default; internet clients get 403.
+      MCD_ALLOWED_NETWORKS: ${MCD_ALLOWED_NETWORKS:-127.0.0.0/8,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,fc00::/7}
+      MCD_TRUSTED_PROXIES: ${MCD_TRUSTED_PROXIES:-}
+      MCD_RATE_LIMIT_PER_MINUTE: ${MCD_RATE_LIMIT_PER_MINUTE:-600}
+    volumes:
+      - mcd-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  scanner:
+    build:
+      context: .
+      dockerfile: docker/scanner.Dockerfile
+    image: mcdiscovery-scanner:local
+    # Exits with 0 when there is nothing to scan; restarts only after a crash.
+    restart: on-failure
+    # Host networking: masscan's raw packets then bypass Docker's NAT. On the default bridge network every
+    # unanswered SYN occupies a conntrack entry for ~2 minutes, so the table fills within seconds and packets
+    # are silently dropped. The scanner opens no ports, so this exposes nothing.
+    network_mode: host
+    command:
+      - scan
+      - --targets-file=/config/targets.txt
+      - --exclude-file=/config/exclude.txt
+      - --ports=${SCAN_PORTS:-25565}
+      - --bedrock=${SCAN_BEDROCK:-false}
+      - --rate=${SCAN_RATE:-10000}
+      - --engine=${SCAN_ENGINE:-auto}
+      - --concurrency=${SCAN_CONCURRENCY:-512}
+      - --login-probe=${SCAN_LOGIN_PROBE:-true}
+      - --query=${SCAN_QUERY:-true}
+      - --loop=${SCAN_LOOP:-true}
+      - --interval=${SCAN_INTERVAL:-24h}
+    volumes:
+      - mcd-data:/data
+      - ./config:/config:ro
+    read_only: true
+    tmpfs:
+      - /tmp
+    # masscan sends raw packets: only these two capabilities, everything else dropped.
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+
+  # Optional: keeps player counts and online status fresh between full scans.
+  #   docker compose --profile rescan up -d
+  rescanner:
+    profiles: ["rescan"]
+    image: mcdiscovery-scanner:local
+    build:
+      context: .
+      dockerfile: docker/scanner.Dockerfile
+    restart: unless-stopped
+    command:
+      - rescan
+      - --seen-within=${RESCAN_SEEN_WITHIN:-30d}
+      - --login-probe=${SCAN_LOGIN_PROBE:-true}
+      - --query=${SCAN_QUERY:-true}
+      - --loop=true
+      - --interval=${RESCAN_INTERVAL:-1h}
+    volumes:
+      - mcd-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  # Named volume (not a bind mount) so SQLite file locking works on every platform, including Docker Desktop.
+  mcd-data:

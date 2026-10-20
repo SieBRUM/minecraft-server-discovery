@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- A tiny fake Minecraft server (Java status/login/legacy/query + Bedrock) used by the tests and for local end-to-end runs. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>McDiscovery.FakeServer</RootNamespace>
+    <AssemblyName>mcd-fakeserver</AssemblyName>
+    <IsPackable>false</IsPackable>
+    <!-- Test helper: public counters as fields are fine here. -->
+    <NoWarn>$(NoWarn);CA1051;CA5394;CA2000</NoWarn>
+  </PropertyGroup>
+
+</Project>

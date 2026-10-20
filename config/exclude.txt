@@ -1,0 +1,19 @@
+# Ranges the scanner never touches, applied on top of the built-in exclusions
+# (0.0.0.0/8, 127.0.0.0/8, 169.254.0.0/16, 224.0.0.0/4 multicast and 240.0.0.0/4 reserved).
+# Add opt-out requests from network owners here.
+
+# Private networks (RFC 1918). Remove these lines to scan your own LAN.
+10.0.0.0/8
+172.16.0.0/12
+192.168.0.0/16
+
+# Carrier-grade NAT (RFC 6598)
+100.64.0.0/10
+
+# IETF protocol assignments, documentation and benchmarking ranges (RFC 6890, RFC 5737, RFC 2544)
+192.0.0.0/24
+192.0.2.0/24
+192.88.99.0/24
+198.18.0.0/15
+198.51.100.0/24
+203.0.113.0/24

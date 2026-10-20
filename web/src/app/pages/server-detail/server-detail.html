@@ -1,0 +1,273 @@
+@switch (detail().state) {
+  @case ('loading') {
+    <p>Loading…</p>
+  }
+  @case ('error') {
+    <p class="error" role="alert">Server not found.</p>
+    <a mat-button routerLink="/servers">Back to the list</a>
+  }
+}
+
+@if (detail(); as d) {
+  @if (d.state === 'ok') {
+    @let s = d.value.summary;
+    @let v = d.value;
+    <header class="head">
+      <app-favicon [serverId]="s.id" [hasFavicon]="s.hasFavicon" [size]="64" />
+      <div class="title">
+        <h1>
+          {{ s.address }}:{{ s.port }}
+          <button mat-button type="button" (click)="copy(s.address + ':' + s.port)">
+            {{ copied() ? 'Copied' : 'Copy' }}
+          </button>
+        </h1>
+        <div class="badges">
+          <span class="badge" [class.on]="s.isOnline">{{ s.isOnline ? 'Online' : 'Offline' }}</span>
+          <span class="badge">{{ s.edition }} Edition</span>
+          @if (s.software) {
+            <span class="badge">{{ s.software }}</span>
+          }
+          @if (s.modLoader && s.modLoader !== s.software) {
+            <span class="badge">{{ s.modLoader }}</span>
+          }
+        </div>
+      </div>
+    </header>
+
+    <app-motd [segments]="s.motd" [fallback]="s.motdPlain ?? '(no MOTD)'" [dark]="true" />
+
+    <div class="grid">
+      <mat-card appearance="outlined">
+        <mat-card-header><mat-card-title>Status</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <dl>
+            <dt>Version</dt>
+            <dd>
+              {{ s.versionName ?? '—' }}
+              @if (s.protocolVersion !== null) {
+                <span class="muted">(protocol {{ s.protocolVersion }})</span>
+              }
+            </dd>
+            <dt>Players</dt>
+            <dd>
+              {{ s.playersOnline ?? '?' }} / {{ s.playersMax ?? '?' }}
+              <span class="muted">(peak {{ v.peakPlayers | number }})</span>
+            </dd>
+            <dt>Latency</dt>
+            <dd>
+              {{ s.latencyMs !== null ? s.latencyMs + ' ms' : '—' }}
+              <span class="muted">from the scanner</span>
+            </dd>
+            <dt>First seen</dt>
+            <dd>{{ s.firstSeenUtc | date: 'medium' }}</dd>
+            <dt>Last online</dt>
+            <dd>
+              {{ s.lastSeenUtc | date: 'medium' }}
+              <span class="muted">({{ s.lastSeenUtc | timeAgo }})</span>
+            </dd>
+            <dt>Last scanned</dt>
+            <dd>
+              {{ v.lastScannedUtc | date: 'medium' }}
+              @if (v.consecutiveFailures > 0) {
+                <span class="muted">({{ v.consecutiveFailures }} failed probes in a row)</span>
+              }
+            </dd>
+          </dl>
+        </mat-card-content>
+      </mat-card>
+
+      @if (s.edition === 'Java') {
+        <mat-card appearance="outlined">
+          <mat-card-header><mat-card-title>Access</mat-card-title></mat-card-header>
+          <mat-card-content>
+            <dl>
+              <dt>Login probe</dt>
+              <dd>{{ v.loginResult | loginLabel }}</dd>
+              @if (v.loginMessage) {
+                <dt>Message</dt>
+                <dd class="pre">{{ v.loginMessage }}</dd>
+              }
+              <dt>Online mode</dt>
+              <dd>{{ s.onlineMode === null ? 'unknown' : s.onlineMode ? 'yes' : 'no' }}</dd>
+              <dt>Whitelist</dt>
+              <dd>{{ s.whitelisted === null ? 'unknown' : s.whitelisted ? 'yes' : 'no' }}</dd>
+              <dt>Secure chat</dt>
+              <dd>
+                {{
+                  v.enforcesSecureChat === null
+                    ? 'unknown'
+                    : v.enforcesSecureChat
+                      ? 'enforced'
+                      : 'not enforced'
+                }}
+              </dd>
+              @if (v.preventsChatReports) {
+                <dt>Chat reports</dt>
+                <dd>blocked (No Chat Reports)</dd>
+              }
+            </dl>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      <mat-card appearance="outlined">
+        <mat-card-header><mat-card-title>Location</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <dl>
+            <dt>Country</dt>
+            <dd>{{ s.countryCode | flag }} {{ s.countryName ?? '—' }}</dd>
+            <dt>Region / city</dt>
+            <dd>{{ v.region ?? '—' }} / {{ s.city ?? '—' }}</dd>
+            <dt>Network</dt>
+            <dd>{{ v.asn ? 'AS' + v.asn : '—' }} {{ v.asOrganization ?? '' }}</dd>
+            <dt>Coordinates</dt>
+            <dd>
+              @if (mapLink(v); as link) {
+                <a [href]="link" target="_blank" rel="noopener noreferrer"
+                  >{{ v.latitude }}, {{ v.longitude }}</a
+                >
+                <span class="muted">(approximate)</span>
+              } @else {
+                —
+              }
+            </dd>
+          </dl>
+        </mat-card-content>
+      </mat-card>
+
+      @if (v.queryEnabled || s.edition === 'Bedrock') {
+        <mat-card appearance="outlined">
+          <mat-card-header
+            ><mat-card-title>{{
+              s.edition === 'Bedrock' ? 'Bedrock' : 'Query'
+            }}</mat-card-title></mat-card-header
+          >
+          <mat-card-content>
+            <dl>
+              @if (s.edition === 'Bedrock') {
+                <dt>Level</dt>
+                <dd>{{ v.bedrockLevelName ?? '—' }}</dd>
+                <dt>Game mode</dt>
+                <dd>{{ v.bedrockGameMode ?? '—' }}</dd>
+                <dt>Server GUID</dt>
+                <dd class="mono">{{ v.bedrockServerGuid ?? '—' }}</dd>
+              } @else {
+                <dt>Software</dt>
+                <dd>{{ v.querySoftware ?? '—' }}</dd>
+                <dt>Map</dt>
+                <dd>{{ v.queryMap ?? '—' }}</dd>
+                <dt>Game type</dt>
+                <dd>{{ v.queryGameType ?? '—' }}</dd>
+              }
+            </dl>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+
+    <mat-card appearance="outlined" class="wide">
+      <mat-card-header>
+        <mat-card-title>History</mat-card-title>
+        <mat-card-subtitle>
+          @if (uptime() !== null) {
+            Online in {{ uptime() | percent: '1.0-1' }} of {{ history().length | number }} probes
+          } @else {
+            No history yet
+          }
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-button-toggle-group
+          [value]="days()"
+          (change)="days.set($event.value)"
+          aria-label="History range"
+        >
+          <mat-button-toggle [value]="1">Day</mat-button-toggle>
+          <mat-button-toggle [value]="7">Week</mat-button-toggle>
+          <mat-button-toggle [value]="30">Month</mat-button-toggle>
+          <mat-button-toggle [value]="365">Year</mat-button-toggle>
+        </mat-button-toggle-group>
+        <app-history-chart [points]="history()" />
+      </mat-card-content>
+    </mat-card>
+
+    @if (v.plugins.length) {
+      <mat-card appearance="outlined" class="wide">
+        <mat-card-header
+          ><mat-card-title>Plugins ({{ v.plugins.length }})</mat-card-title></mat-card-header
+        >
+        <mat-card-content>
+          <ul class="chips">
+            @for (p of v.plugins; track $index) {
+              <li>{{ p }}</li>
+            }
+          </ul>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @if (v.mods.length) {
+      <mat-card appearance="outlined" class="wide">
+        <mat-card-header
+          ><mat-card-title>Mods ({{ v.mods.length }})</mat-card-title></mat-card-header
+        >
+        <mat-card-content>
+          <ul class="chips">
+            @for (m of v.mods; track $index) {
+              <li>
+                {{ m.id }}
+                @if (m.version) {
+                  <span class="muted"> {{ m.version }}</span>
+                }
+              </li>
+            }
+          </ul>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <mat-card appearance="outlined" class="wide">
+      <mat-card-header>
+        <mat-card-title>Players seen ({{ v.playerCount | number }})</mat-card-title>
+        <mat-card-subtitle
+          >From the status sample and the query protocol; servers only show a few
+          players.</mat-card-subtitle
+        >
+      </mat-card-header>
+      <mat-card-content>
+        @if (v.players.length) {
+          <div class="table-wrap">
+            <table mat-table [dataSource]="v.players">
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let p">
+                  <a [routerLink]="['/players', p.playerId]">{{ p.name }}</a>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="uuid">
+                <th mat-header-cell *matHeaderCellDef>UUID</th>
+                <td mat-cell *matCellDef="let p" class="mono">{{ p.uuid ?? '—' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="firstSeen">
+                <th mat-header-cell *matHeaderCellDef>First seen</th>
+                <td mat-cell *matCellDef="let p">{{ p.firstSeenUtc | date: 'short' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="lastSeen">
+                <th mat-header-cell *matHeaderCellDef>Last seen</th>
+                <td mat-cell *matCellDef="let p">{{ p.lastSeenUtc | timeAgo }}</td>
+              </ng-container>
+              <ng-container matColumnDef="timesSeen">
+                <th mat-header-cell *matHeaderCellDef>Times seen</th>
+                <td mat-cell *matCellDef="let p">{{ p.timesSeen | number }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="playerColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: playerColumns"></tr>
+            </table>
+          </div>
+        } @else {
+          <p class="muted">No players recorded.</p>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+}

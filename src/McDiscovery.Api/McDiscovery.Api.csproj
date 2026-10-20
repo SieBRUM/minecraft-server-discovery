@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <RootNamespace>McDiscovery.Api</RootNamespace>
+    <AssemblyName>mcd-api</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="McDiscovery.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\McDiscovery.Core\McDiscovery.Core.csproj" />
+  </ItemGroup>
+
+</Project>
