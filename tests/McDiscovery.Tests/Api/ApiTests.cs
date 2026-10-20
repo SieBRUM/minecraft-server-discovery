@@ -154,6 +154,11 @@ public sealed class ApiTests : IAsyncLifetime
 
         var byIp = await client.GetFromJsonAsync<JsonElement>("/api/servers?q=5.6.7.8", Ct);
         Assert.Equal(1, byIp.GetProperty("total").GetInt32());
+
+        var cell = await client.GetFromJsonAsync<JsonElement>("/api/servers?cellLat=52.4&cellLon=4.9", Ct);
+        Assert.Equal(1, cell.GetProperty("total").GetInt32());
+        var emptyCell = await client.GetFromJsonAsync<JsonElement>("/api/servers?cellLat=10&cellLon=10", Ct);
+        Assert.Equal(0, emptyCell.GetProperty("total").GetInt32());
     }
 
     [Theory]

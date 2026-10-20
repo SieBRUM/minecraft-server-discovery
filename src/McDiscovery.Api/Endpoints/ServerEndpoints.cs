@@ -21,6 +21,8 @@ public sealed record ServerQuery(
     int? MinPlayers,
     bool? Modded,
     bool? HasPlugins,
+    double? CellLat,
+    double? CellLon,
     string? Sort,
     string? Dir,
     int? Page,
@@ -153,6 +155,13 @@ public static class ServerEndpoints
         if (query.HasPlugins == true)
         {
             servers = servers.Where(s => s.PluginsJson != null);
+        }
+
+        // A map cell (see MapAsync): coordinates that round to the given one-decimal value.
+        if (query.CellLat is { } lat && query.CellLon is { } lon && double.IsFinite(lat) && double.IsFinite(lon))
+        {
+            double latMin = lat - 0.05, latMax = lat + 0.05, lonMin = lon - 0.05, lonMax = lon + 0.05;
+            servers = servers.Where(s => s.Latitude >= latMin && s.Latitude < latMax && s.Longitude >= lonMin && s.Longitude < lonMax);
         }
 
         return servers;

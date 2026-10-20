@@ -1,0 +1,231 @@
+<section class="filters" aria-label="Filters">
+  <mat-form-field class="search" subscriptSizing="dynamic">
+    <mat-label>Search address, MOTD, version or network</mat-label>
+    <input
+      matInput
+      type="search"
+      maxlength="100"
+      [ngModel]="filter().q ?? ''"
+      (ngModelChange)="onSearch($event)"
+    />
+  </mat-form-field>
+
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Edition</mat-label>
+    <mat-select
+      [value]="filter().edition ?? ''"
+      (valueChange)="update({ edition: $event || undefined })"
+    >
+      <mat-option value="">All</mat-option>
+      <mat-option value="java">Java</mat-option>
+      <mat-option value="bedrock">Bedrock</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Status</mat-label>
+    <mat-select
+      [value]="filter().online === undefined ? '' : '' + filter().online"
+      (valueChange)="update({ online: boolValue($event) })"
+    >
+      <mat-option value="">All</mat-option>
+      <mat-option value="true">Online</mat-option>
+      <mat-option value="false">Offline</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Country</mat-label>
+    <mat-select
+      [value]="filter().country ?? ''"
+      (valueChange)="update({ country: $event || undefined })"
+    >
+      <mat-option value="">All</mat-option>
+      @for (c of facets()?.countries ?? []; track c.key) {
+        <mat-option [value]="c.key"
+          >{{ c.key | flag }} {{ c.label ?? c.key }} ({{ c.count | number }})</mat-option
+        >
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Software</mat-label>
+    <mat-select
+      [value]="filter().software ?? ''"
+      (valueChange)="update({ software: $event || undefined })"
+    >
+      <mat-option value="">All</mat-option>
+      <mat-option value="unknown">Unknown / vanilla</mat-option>
+      @for (s of facets()?.software ?? []; track s.key) {
+        <mat-option [value]="s.key">{{ s.key }} ({{ s.count | number }})</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Authentication</mat-label>
+    <mat-select [value]="authValue()" (valueChange)="setAuth($event)">
+      <mat-option value="">Any</mat-option>
+      <mat-option value="online">Online mode</mat-option>
+      <mat-option value="offline">Offline mode</mat-option>
+      <mat-option value="whitelist">Whitelisted</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Mods</mat-label>
+    <mat-select
+      [value]="filter().modded === undefined ? '' : '' + filter().modded"
+      (valueChange)="update({ modded: boolValue($event) })"
+    >
+      <mat-option value="">Any</mat-option>
+      <mat-option value="true">Modded</mat-option>
+      <mat-option value="false">Not modded</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field class="narrow" subscriptSizing="dynamic">
+    <mat-label>Min. players</mat-label>
+    <input
+      matInput
+      type="number"
+      min="0"
+      [ngModel]="filter().minPlayers ?? null"
+      (ngModelChange)="
+        update({ minPlayers: $event === null || $event === '' ? undefined : +$event })
+      "
+    />
+  </mat-form-field>
+
+  @if (hasFilters()) {
+    <button mat-button type="button" (click)="clear()">Clear filters</button>
+  }
+</section>
+
+@if (filter().cellLat !== undefined) {
+  <p class="note">
+    Showing servers near {{ filter().cellLat }}, {{ filter().cellLon }} (from the map).
+  </p>
+}
+
+<div class="table-wrap">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+  @if (error(); as message) {
+    <p class="error" role="alert">{{ message }}</p>
+  }
+
+  <table
+    mat-table
+    [dataSource]="result()?.items ?? []"
+    matSort
+    [matSortActive]="filter().sort ?? 'lastSeen'"
+    [matSortDirection]="filter().dir ?? 'desc'"
+    (matSortChange)="onSort($event)"
+  >
+    <ng-container matColumnDef="icon">
+      <th mat-header-cell *matHeaderCellDef><span class="sr-only">Icon</span></th>
+      <td mat-cell *matCellDef="let s">
+        <app-favicon [serverId]="s.id" [hasFavicon]="s.hasFavicon" />
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="address">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="address">Address</th>
+      <td mat-cell *matCellDef="let s">
+        <a [routerLink]="['/servers', s.id]" class="address">{{ s.address }}:{{ s.port }}</a>
+        <div class="sub">
+          <span
+            class="dot"
+            [class.on]="s.isOnline"
+            [matTooltip]="s.isOnline ? 'Online' : 'Offline'"
+          ></span>
+          {{ s.edition }}
+        </div>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="motd">
+      <th mat-header-cell *matHeaderCellDef>MOTD</th>
+      <td mat-cell *matCellDef="let s" class="motd-cell">
+        <app-motd [segments]="s.motd" [fallback]="s.motdPlain ?? ''" />
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="version">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="version">Version</th>
+      <td mat-cell *matCellDef="let s">{{ s.versionName }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="players">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="players" start="desc">Players</th>
+      <td mat-cell *matCellDef="let s" class="num">
+        {{ s.playersOnline ?? '?' }} / {{ s.playersMax ?? '?' }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="country">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="country">Location</th>
+      <td mat-cell *matCellDef="let s">
+        @if (s.countryCode) {
+          <span [matTooltip]="s.countryName ?? s.countryCode"
+            >{{ s.countryCode | flag }} {{ s.countryCode }}</span
+          >
+          @if (s.city) {
+            <div class="sub">{{ s.city }}</div>
+          }
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="software">
+      <th mat-header-cell *matHeaderCellDef>Software</th>
+      <td mat-cell *matCellDef="let s">
+        {{ s.software ?? '' }}
+        @if (s.modLoader && s.modLoader !== s.software) {
+          <div class="sub">{{ s.modLoader }}</div>
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="auth">
+      <th mat-header-cell *matHeaderCellDef>Auth</th>
+      <td mat-cell *matCellDef="let s">
+        @if (s.whitelisted) {
+          <span class="tag">whitelist</span>
+        }
+        @if (s.onlineMode === true) {
+          <span class="tag">online</span>
+        } @else if (s.onlineMode === false) {
+          <span class="tag warn">offline</span>
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="lastSeen">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="lastSeen" start="desc">Last seen</th>
+      <td mat-cell *matCellDef="let s">{{ s.lastSeenUtc | timeAgo }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: columns"></tr>
+    <tr class="mat-mdc-row" *matNoDataRow>
+      <td class="empty" [attr.colspan]="columns.length">
+        @if (!loading()) {
+          No servers found. Run the scanner (see the README) or change the filters.
+        }
+      </td>
+    </tr>
+  </table>
+</div>
+
+<mat-paginator
+  [length]="result()?.total ?? 0"
+  [pageIndex]="(filter().page ?? 1) - 1"
+  [pageSize]="filter().pageSize ?? 25"
+  [pageSizeOptions]="[25, 50, 100]"
+  (page)="onPage($event)"
+  showFirstLastButtons
+/>
