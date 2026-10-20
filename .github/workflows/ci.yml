@@ -99,12 +99,17 @@ jobs:
       - name: Smoke test images
         run: |
           # masscan runs as the unprivileged user thanks to file capabilities (needs the same caps as docker-compose.yml)
-          docker run --rm --cap-drop ALL --cap-add NET_RAW --cap-add NET_ADMIN --entrypoint masscan mcdiscovery-scanner:ci --version
+          # (masscan --version exits 1 even on success, so check its output instead)
+          out=$(docker run --rm --cap-drop ALL --cap-add NET_RAW --cap-add NET_ADMIN --entrypoint masscan mcdiscovery-scanner:ci --version 2>&1 || true)
+          echo "$out"
+          grep -q 'Masscan version' <<<"$out"
           docker run --rm --entrypoint sh mcdiscovery-scanner:ci -c 'ls /usr/lib/*/libpcap.so*'
           docker run --rm mcdiscovery-scanner:ci scan --targets 192.0.2.1 --dry-run --geoip-update=false
           docker run -d --name api -p 127.0.0.1:18080:8080 -e MCD_ALLOWED_NETWORKS=0.0.0.0/0 mcdiscovery-api:ci
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:18080/api/health && break; sleep 1; done
           curl -fsS http://127.0.0.1:18080/api/stats > /dev/null
-          curl -fsS http://127.0.0.1:18080/servers | grep -q '<app-root>'
-          curl -sI http://127.0.0.1:18080/api/health | grep -qi '^content-security-policy:'
+          page=$(curl -fsS http://127.0.0.1:18080/servers)
+          grep -q '<app-root>' <<<"$page"
+          headers=$(curl -fsS -D - -o /dev/null http://127.0.0.1:18080/api/health)
+          grep -qi '^content-security-policy:' <<<"$headers"
           docker rm -f api
