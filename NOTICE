@@ -21,7 +21,10 @@ masscan (installed into the scanner Docker image from the Ubuntu archive):
   Copyright Robert David Graham, AGPL-3.0, https://github.com/robertdavidgraham/masscan
   Used as a separate program; it is not linked into this project's code.
 
-Map tiles: (c) OpenStreetMap contributors, https://www.openstreetmap.org/copyright
+Country outlines: Natural Earth (public domain, https://www.naturalearthdata.com),
+packaged by world-atlas (ISC) and decoded with topojson-client (ISC), bundled with the website.
+
+Optional street map tiles: (c) OpenStreetMap contributors, https://www.openstreetmap.org/copyright
 
 Libraries (see their own licenses): .NET, ASP.NET Core and Entity Framework Core
 (MIT), MaxMind.Db (Apache-2.0), System.CommandLine (MIT), Angular and Angular

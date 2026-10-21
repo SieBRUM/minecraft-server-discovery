@@ -22,9 +22,17 @@ server details with player/uptime history, a world map, player search and statis
 It's a research tool. It's not a griefing tool, it's not a "find servers to wreck" tool, and it's not
 production software with a support contract. It's a lab coat with a port scanner in the pocket.
 
+<p align="center">
+  <img src="docs/screenshots/servers-dark.png" alt="Server list in dark mode" width="49%" />
+  <img src="docs/screenshots/servers-light.png" alt="Server list in light mode" width="49%" />
+</p>
+
+<sub>Screenshots use made-up demo data on documentation IP ranges. More in the [gallery](#gallery).</sub>
+
 ## Table of contents
 
 - [What does it do?](#what-does-it-do)
+- [Gallery](#gallery)
 - [I'm a busy person and I don't have time to read all this](#im-a-busy-person-and-i-dont-have-time-to-read-all-this)
 - [Please don't get us (or you) in trouble](#please-dont-get-us-or-you-in-trouble)
 - [What does it collect?](#what-does-it-collect)
@@ -52,12 +60,27 @@ Three things, each in its own box, so you can kick one without upsetting the oth
   over UDP, and then talks to everything it finds with its own Minecraft protocol client (the nosy part).
 - **The API** (C#/ASP.NET Core) is read-only, deeply suspicious of strangers, and only listens to
   localhost unless you tell it otherwise.
-- **The website** (Angular 22) is the pretty part. It only ever talks to the API.
+- **The website** (Angular 22) is the pretty part, now with a dark mode for 3 AM research sessions (it
+  follows your OS, or click the toggle in the top right). It only ever talks to the API.
 
 Everything lives in **one SQLite file** on a persistent Docker volume. **One `docker compose up`** starts the
 whole circus, and the scanner can be restarted, rescanned or re-ingested on its own while the website keeps
 running. Works on Linux (Ubuntu Server and friends) and Windows, with or without Docker. CI builds and tests
 on both.
+
+## Gallery
+
+All screenshots use fictional demo data (documentation-only IP ranges, made-up names).
+
+| | |
+| --- | --- |
+| **Server details**: MOTD, access, location, 30-day player and latency history | ![Server details, light](docs/screenshots/server-detail-light.png) |
+| **Dark mode** | ![Server details, dark](docs/screenshots/server-detail-dark.png) |
+| **Statistics**: countries, versions, software, login-probe results, networks, scan runs | ![Statistics, dark](docs/screenshots/stats-dark.png) |
+| **World map**: built-in offline map, OpenStreetMap street tiles optional | ![Map, dark](docs/screenshots/map-dark.png) |
+| **Map, light** | ![Map, light](docs/screenshots/map-light.png) |
+| **Players** | ![Players, light](docs/screenshots/players-light.png) |
+| **Player details**: every server a player was seen on | ![Player details, dark](docs/screenshots/player-detail-dark.png) |
 
 ## I'm a busy person and I don't have time to read all this
 
@@ -315,12 +338,14 @@ What keeps the bad people sad:
   are served as `image/png` with `nosniff`.
 - A strict `Content-Security-Policy` (no inline or third-party scripts; images only from the site itself and
   the OpenStreetMap tile server), `X-Frame-Options: DENY`, `Referrer-Policy` and `Permissions-Policy`.
+- Player avatars are generated locally from a hash of the name; no skin services are contacted.
 - All input is validated and clamped, with per-IP rate limiting and request size limits.
 - Containers run as an unprivileged user with read-only root filesystems and all capabilities dropped; the
   scanner keeps only `NET_RAW` and `NET_ADMIN`.
 - CI runs CodeQL (security-extended) and `npm audit`, and Dependabot nags about outdated dependencies.
 
-The only third-party request the website makes is fetching map tiles from `tile.openstreetmap.org`.
+The website makes no third-party requests by default. The world map is drawn from country outlines bundled
+with the site; only if you switch on "Street map" does the browser fetch tiles from `tile.openstreetmap.org`.
 
 ## Your data, backups and the big red button
 
@@ -391,6 +416,7 @@ be upset. More notes for contributors (and their AI assistants) are in [CLAUDE.m
 | `masscan exited with code 1 … libpcap` / `Operation not permitted` | Natively: install libpcap and grant capabilities (see above). In `auto` mode the scanner shrugs and uses the connect scanner instead. |
 | masscan finds nothing on a LAN / Docker network | Use `--engine connect` for directly connected networks (see [Driving the scanner](#driving-the-scanner)). |
 | masscan finds nothing on Docker Desktop | Turn on host networking in the Docker Desktop settings, or set `SCAN_ENGINE=connect`. |
+| The map has no streets | That's the offline base map. Flip "Street map (OpenStreetMap)" on; it needs internet access in the browser. |
 | No locations on the map | The GeoIP download failed (no internet?). Run `docker compose run --rm scanner geoip-update` and read what it says. |
 | `database is locked` warnings | Harmless at low rates (the writer retries). Make sure only one full scan runs at a time. |
 | Everything is called "A Minecraft Server" | That's not a bug, that's the default `server.properties`. |
@@ -426,7 +452,9 @@ Standing on the shoulders of giants (and a few creepers):
   inspiration for its server probing (this rewrite has its own implementation).
 - The [Minecraft Wiki protocol documentation](https://minecraft.wiki/w/Java_Edition_protocol) (formerly
   wiki.vg), including its query and Bedrock/RakNet pages. The protocol code is built on it.
-- [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (map data) and [Leaflet](https://leafletjs.com).
+- [Natural Earth](https://www.naturalearthdata.com) (public domain country outlines) via
+  [world-atlas](https://github.com/topojson/world-atlas) and [topojson-client](https://github.com/topojson/topojson-client).
+- [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (optional street map) and [Leaflet](https://leafletjs.com).
 - [Angular](https://angular.dev), [Angular Material](https://material.angular.dev), [Chart.js](https://www.chartjs.org),
   [.NET / ASP.NET Core / EF Core](https://dotnet.microsoft.com), [MaxMind DB reader](https://github.com/maxmind/MaxMind-DB-Reader-dotnet),
   [System.CommandLine](https://github.com/dotnet/command-line-api), [xUnit](https://xunit.net).

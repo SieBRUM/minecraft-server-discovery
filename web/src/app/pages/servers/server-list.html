@@ -1,5 +1,12 @@
-<section class="filters" aria-label="Filters">
-  <mat-form-field class="search" subscriptSizing="dynamic">
+<div class="page-head">
+  <div>
+    <h1>Servers</h1>
+    <p>{{ result()?.total ?? 0 | number }} servers match · click one for details and history</p>
+  </div>
+</div>
+
+<section class="filters panel" aria-label="Filters">
+  <mat-form-field class="search" appearance="outline" subscriptSizing="dynamic">
     <mat-label>Search address, MOTD, version or network</mat-label>
     <input
       matInput
@@ -10,7 +17,7 @@
     />
   </mat-form-field>
 
-  <mat-form-field subscriptSizing="dynamic">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Edition</mat-label>
     <mat-select
       [value]="filter().edition ?? ''"
@@ -22,7 +29,7 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field subscriptSizing="dynamic">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Status</mat-label>
     <mat-select
       [value]="filter().online === undefined ? '' : '' + filter().online"
@@ -34,7 +41,7 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field subscriptSizing="dynamic">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Country</mat-label>
     <mat-select
       [value]="filter().country ?? ''"
@@ -49,7 +56,7 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field subscriptSizing="dynamic">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Software</mat-label>
     <mat-select
       [value]="filter().software ?? ''"
@@ -63,7 +70,7 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field subscriptSizing="dynamic">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Authentication</mat-label>
     <mat-select [value]="authValue()" (valueChange)="setAuth($event)">
       <mat-option value="">Any</mat-option>
@@ -73,7 +80,7 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field subscriptSizing="dynamic">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Mods</mat-label>
     <mat-select
       [value]="filter().modded === undefined ? '' : '' + filter().modded"
@@ -85,7 +92,7 @@
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field class="narrow" subscriptSizing="dynamic">
+  <mat-form-field class="narrow" appearance="outline" subscriptSizing="dynamic">
     <mat-label>Min. players</mat-label>
     <input
       matInput
@@ -109,7 +116,7 @@
   </p>
 }
 
-<div class="table-wrap">
+<div class="table-wrap panel">
   @if (loading()) {
     <mat-progress-bar mode="indeterminate" />
   }
@@ -137,12 +144,8 @@
       <td mat-cell *matCellDef="let s">
         <a [routerLink]="['/servers', s.id]" class="address">{{ s.address }}:{{ s.port }}</a>
         <div class="sub">
-          <span
-            class="dot"
-            [class.on]="s.isOnline"
-            [matTooltip]="s.isOnline ? 'Online' : 'Offline'"
-          ></span>
-          {{ s.edition }}
+          <span class="dot" [class.on]="s.isOnline"></span>
+          {{ s.isOnline ? 'Online' : 'Offline' }} · {{ s.edition }}
         </div>
       </td>
     </ng-container>
@@ -150,19 +153,27 @@
     <ng-container matColumnDef="motd">
       <th mat-header-cell *matHeaderCellDef>MOTD</th>
       <td mat-cell *matCellDef="let s" class="motd-cell">
-        <app-motd [segments]="s.motd" [fallback]="s.motdPlain ?? ''" />
+        <app-motd [segments]="s.motd" [fallback]="s.motdPlain ?? ''" [compact]="true" />
       </td>
     </ng-container>
 
     <ng-container matColumnDef="version">
       <th mat-header-cell *matHeaderCellDef mat-sort-header="version">Version</th>
-      <td mat-cell *matCellDef="let s">{{ s.versionName }}</td>
+      <td mat-cell *matCellDef="let s">
+        <span class="version">{{ s.versionName }}</span>
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="players">
       <th mat-header-cell *matHeaderCellDef mat-sort-header="players" start="desc">Players</th>
       <td mat-cell *matCellDef="let s" class="num">
-        {{ s.playersOnline ?? '?' }} / {{ s.playersMax ?? '?' }}
+        <strong>{{ s.playersOnline ?? '?' }}</strong
+        ><span class="muted"> / {{ s.playersMax ?? '?' }}</span>
+        @if (s.playersOnline !== null && s.playersMax) {
+          <div class="bar">
+            <span [style.width.%]="(s.playersOnline / s.playersMax) * 100"></span>
+          </div>
+        }
       </td>
     </ng-container>
 
@@ -194,12 +205,12 @@
       <th mat-header-cell *matHeaderCellDef>Auth</th>
       <td mat-cell *matCellDef="let s">
         @if (s.whitelisted) {
-          <span class="tag">whitelist</span>
+          <span class="pill warn">whitelist</span>
         }
         @if (s.onlineMode === true) {
-          <span class="tag">online</span>
+          <span class="pill ok">online mode</span>
         } @else if (s.onlineMode === false) {
-          <span class="tag warn">offline</span>
+          <span class="pill bad">cracked</span>
         }
       </td>
     </ng-container>
@@ -222,6 +233,7 @@
 </div>
 
 <mat-paginator
+  class="panel paginator"
   [length]="result()?.total ?? 0"
   [pageIndex]="(filter().page ?? 1) - 1"
   [pageSize]="filter().pageSize ?? 25"

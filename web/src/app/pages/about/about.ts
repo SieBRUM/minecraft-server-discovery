@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   selector: 'app-about',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <article>
+    <article class="panel">
       <h1>About</h1>
       <p>
         Minecraft Server Discovery is a research tool. A scanner finds Minecraft servers in IP
@@ -39,7 +39,17 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
             rel="noopener noreferrer"
             >OpenStreetMap</a
           >
-          contributors, map rendering by
+          contributors, country outlines from
+          <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener noreferrer"
+            >Natural Earth</a
+          >
+          (public domain) via
+          <a
+            href="https://github.com/topojson/world-atlas"
+            target="_blank"
+            rel="noopener noreferrer"
+            >world-atlas</a
+          >, map rendering by
           <a href="https://leafletjs.com" target="_blank" rel="noopener noreferrer">Leaflet</a>
         </li>
         <li>

@@ -1,5 +1,7 @@
 @use '@angular/material' as mat;
 
+// Material 3 theme. Its tokens use light-dark(), so they follow `color-scheme`, which ThemeService sets
+// on <html> (light, dark, or the OS preference).
 html {
   color-scheme: light dark;
   @include mat.theme(
@@ -13,7 +15,55 @@ html {
           plain-family: system-ui,
           brand-family: system-ui,
         ),
-      density: 0,
+      density: -1,
+    )
+  );
+
+  // App-level design tokens (used by our own components and the canvas charts).
+  --app-bg: light-dark(#f4f6f3, #0e1210);
+  --app-bg-glow: light-dark(rgba(76, 175, 80, 0.1), rgba(76, 175, 80, 0.12));
+  --app-surface: light-dark(#ffffff, #161b18);
+  --app-surface-2: light-dark(#f0f3ef, #1d2420);
+  --app-border: light-dark(#e1e6df, #29312c);
+  --app-text: light-dark(#18201b, #e3e8e4);
+  --app-muted: light-dark(#5f6b63, #94a198);
+  --app-accent: light-dark(#2e7d32, #66bb6a);
+  --app-accent-soft: light-dark(rgba(46, 125, 50, 0.1), rgba(102, 187, 106, 0.14));
+  --app-danger-soft: light-dark(rgba(198, 40, 40, 0.1), rgba(239, 83, 80, 0.16));
+  --app-danger: light-dark(#c62828, #ef9a9a);
+  --app-warn-soft: light-dark(rgba(239, 108, 0, 0.12), rgba(255, 167, 38, 0.16));
+  --app-warn: light-dark(#b45309, #ffcc80);
+  --app-radius: 14px;
+  --app-shadow: light-dark(0 1px 2px rgba(16, 24, 20, 0.06), 0 1px 2px rgba(0, 0, 0, 0.4));
+  --app-grid: light-dark(rgba(0, 0, 0, 0.06), rgba(255, 255, 255, 0.07));
+
+  // Map (offline world outline)
+  --map-water: light-dark(#dfe9f0, #0b1418);
+  --map-land: light-dark(#f7f8f5, #1c2420);
+  --map-border: light-dark(#c7d0c9, #33403a);
+
+  @include mat.table-overrides(
+    (
+      background-color: transparent,
+      header-headline-color: var(--app-muted),
+      row-item-outline-color: var(--app-border),
+    )
+  );
+  @include mat.paginator-overrides(
+    (
+      container-background-color: transparent,
+    )
+  );
+  @include mat.card-overrides(
+    (
+      outlined-container-color: var(--app-surface),
+      outlined-outline-color: var(--app-border),
+      outlined-container-shape: 14px,
+    )
+  );
+  @include mat.form-field-overrides(
+    (
+      outlined-container-shape: 10px,
     )
   );
 }
@@ -26,12 +76,89 @@ body {
     'Segoe UI',
     Roboto,
     sans-serif;
-  background: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
+  background:
+    radial-gradient(1200px 500px at 10% -10%, var(--app-bg-glow), transparent 60%),
+    radial-gradient(900px 400px at 100% 0%, var(--app-bg-glow), transparent 55%), var(--app-bg);
+  background-attachment: fixed;
+  color: var(--app-text);
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
-  color: var(--mat-sys-primary);
+  color: var(--app-accent);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+h1 {
+  font-size: 26px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  margin: 0 0 4px;
+}
+
+// A rounded surface used by most pages.
+.panel {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  box-shadow: var(--app-shadow);
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 8px 0 20px;
+
+  p {
+    margin: 0;
+    color: var(--app-muted);
+  }
+}
+
+// Small status pills.
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--app-surface-2);
+  color: var(--app-muted);
+  white-space: nowrap;
+
+  &.ok {
+    background: var(--app-accent-soft);
+    color: var(--app-accent);
+  }
+
+  &.bad {
+    background: var(--app-danger-soft);
+    color: var(--app-danger);
+  }
+
+  &.warn {
+    background: var(--app-warn-soft);
+    color: var(--app-warn);
+  }
+}
+
+.muted {
+  color: var(--app-muted);
+}
+
+.mono {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 12px;
 }
 
 .sr-only {
@@ -41,4 +168,39 @@ a {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+// Leaflet popups in both themes.
+.leaflet-container {
+  font: inherit;
+  background: var(--map-water);
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--app-surface);
+  color: var(--app-text);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+}
+
+.leaflet-bar a,
+.leaflet-control-layers {
+  background: var(--app-surface);
+  color: var(--app-text);
+  border-color: var(--app-border);
+}
+
+.leaflet-control-attribution {
+  background: color-mix(in srgb, var(--app-surface) 80%, transparent) !important;
+  color: var(--app-muted);
+}
+
+.map-popup {
+  display: grid;
+  gap: 6px;
+  min-width: 160px;
+
+  strong {
+    font-size: 15px;
+  }
 }

@@ -4,45 +4,117 @@
   min-height: 100vh;
 }
 
-.toolbar {
+.header {
   position: sticky;
   top: 0;
   z-index: 1000;
-  gap: 16px;
+  backdrop-filter: saturate(160%) blur(12px);
+  background: color-mix(in srgb, var(--app-bg) 78%, transparent);
+  border-bottom: 1px solid var(--app-border);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 10px 24px;
   flex-wrap: wrap;
-  height: auto;
-  min-height: 64px;
 }
 
 .brand {
-  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--app-text);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.01em;
   text-decoration: none;
-  font-weight: 600;
+}
+
+.logo {
+  width: 28px;
+  height: 28px;
 }
 
 nav {
   display: flex;
-  flex-wrap: wrap;
   gap: 4px;
+  flex-wrap: wrap;
+  flex: 1;
+
+  a {
+    padding: 7px 14px;
+    border-radius: 999px;
+    color: var(--app-muted);
+    font-weight: 500;
+    font-size: 14px;
+    text-decoration: none;
+    transition:
+      background 0.15s,
+      color 0.15s;
+
+    &:hover {
+      background: var(--app-surface-2);
+      color: var(--app-text);
+    }
+
+    &.active {
+      background: var(--app-accent-soft);
+      color: var(--app-accent);
+    }
+  }
 }
 
-nav a.active {
-  background: var(--mat-sys-secondary-container);
-  color: var(--mat-sys-on-secondary-container);
+.theme-toggle {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-text);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--app-surface-2);
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
 }
 
 main {
   flex: 1;
-  padding: 16px;
-  max-width: 1600px;
+  padding: 20px 24px 32px;
+  max-width: 1440px;
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;
 }
 
 footer {
-  padding: 12px 16px;
+  padding: 16px;
   font-size: 12px;
-  opacity: 0.7;
+  color: var(--app-muted);
   text-align: center;
+  border-top: 1px solid var(--app-border);
+}
+
+@media (max-width: 600px) {
+  .header-inner,
+  main {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 }

@@ -1,33 +1,23 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatToolbarModule } from '@angular/material/toolbar';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { ThemeService } from './core/theme.service';
 
 @Component({
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, MatToolbarModule, MatButtonModule],
-  template: `
-    <mat-toolbar class="toolbar">
-      <a routerLink="/" class="brand">MC Discovery</a>
-      <nav>
-        @for (link of links; track link.path) {
-          <a mat-button [routerLink]="link.path" routerLinkActive="active">{{ link.label }}</a>
-        }
-      </nav>
-    </mat-toolbar>
-    <main><router-outlet /></main>
-    <footer>
-      Research tool ·
-      <a href="https://db-ip.com" target="_blank" rel="noopener noreferrer"
-        >IP Geolocation by DB-IP</a
-      >
-      · <a routerLink="/about">About &amp; credits</a>
-    </footer>
-  `,
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, MatTooltipModule],
+  templateUrl: './app.html',
   styleUrl: './app.scss',
 })
 export class App {
+  protected readonly theme = inject(ThemeService);
+  protected readonly themeLabel = computed(
+    () =>
+      ({ system: 'Theme: follows your system', light: 'Theme: light', dark: 'Theme: dark' })[
+        this.theme.mode()
+      ],
+  );
   protected readonly links = [
     { path: '/servers', label: 'Servers' },
     { path: '/map', label: 'Map' },

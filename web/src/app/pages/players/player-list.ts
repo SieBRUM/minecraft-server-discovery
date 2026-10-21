@@ -24,6 +24,7 @@ import {
 import { ApiService } from '../../core/api.service';
 import { Paged, Player } from '../../core/models';
 import { TimeAgoPipe } from '../../shared/pipes';
+import { pixelAvatar } from '../../shared/avatar';
 
 @Component({
   selector: 'app-player-list',
@@ -39,17 +40,25 @@ import { TimeAgoPipe } from '../../shared/pipes';
     TimeAgoPipe,
   ],
   template: `
-    <mat-form-field class="search" subscriptSizing="dynamic">
+    <div class="page-head">
+      <div>
+        <h1>Players</h1>
+        <p>Names seen in server list samples and query responses</p>
+      </div>
+    </div>
+    <mat-form-field class="search" appearance="outline" subscriptSizing="dynamic">
       <mat-label>Player name (prefix) or UUID</mat-label>
       <input matInput type="search" maxlength="36" (input)="search($any($event.target).value)" />
     </mat-form-field>
 
-    <div class="table-wrap">
+    <div class="table-wrap panel">
       <table mat-table [dataSource]="result()?.items ?? []">
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef>Name</th>
           <td mat-cell *matCellDef="let p">
-            <a [routerLink]="['/players', p.id]">{{ p.name }}</a>
+            <a class="player" [routerLink]="['/players', p.id]"
+              ><img [src]="avatar(p.name)" alt="" width="20" height="20" />{{ p.name }}</a
+            >
           </td>
         </ng-container>
         <ng-container matColumnDef="uuid">
@@ -84,6 +93,16 @@ import { TimeAgoPipe } from '../../shared/pipes';
     />
   `,
   styles: `
+    .player {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+    .player img {
+      border-radius: 4px;
+      image-rendering: pixelated;
+    }
     .search {
       width: 100%;
       max-width: 480px;
@@ -129,6 +148,11 @@ export class PlayerList implements OnInit {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((result) => this.result.set(result));
+  }
+
+  /** A deterministic pixel "head" so players are easy to tell apart (generated locally, no skin lookups). */
+  protected avatar(name: string): string {
+    return pixelAvatar(name);
   }
 
   protected search(value: string): void {
