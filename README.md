@@ -1,6 +1,8 @@
 # Minecraft Server Discovery
 
 [![CI](https://github.com/SieBRUM/minecraft-server-discovery/actions/workflows/ci.yml/badge.svg)](https://github.com/SieBRUM/minecraft-server-discovery/actions/workflows/ci.yml)
+[![Release](https://github.com/SieBRUM/minecraft-server-discovery/actions/workflows/release.yml/badge.svg)](https://github.com/SieBRUM/minecraft-server-discovery/releases/latest)
+[![Latest release](https://img.shields.io/github/v/release/SieBRUM/minecraft-server-discovery?logo=github)](https://github.com/SieBRUM/minecraft-server-discovery/releases/latest)
 [![CodeQL](https://github.com/SieBRUM/minecraft-server-discovery/actions/workflows/codeql.yml/badge.svg)](https://github.com/SieBRUM/minecraft-server-discovery/actions/workflows/codeql.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/SieBRUM/minecraft-server-discovery?style=flat&logo=github)](https://github.com/SieBRUM/minecraft-server-discovery/stargazers)
@@ -37,6 +39,7 @@ production software with a support contract. It's a lab coat with a port scanner
 - [Please don't get us (or you) in trouble](#please-dont-get-us-or-you-in-trouble)
 - [What does it collect?](#what-does-it-collect)
 - [How does it work?](#how-does-it-work)
+- [Downloads (no building required)](#downloads-no-building-required)
 - [Running it with Docker (the easy way)](#running-it-with-docker-the-easy-way)
 - [Building and running it without Docker (the scenic route)](#building-and-running-it-without-docker-the-scenic-route)
 - [Driving the scanner](#driving-the-scanner)
@@ -164,6 +167,54 @@ config/targets ─▶ │ masscan SYN scan ─┐                               
 processes, and this project has exactly one writer plus many readers. A message broker would be one more
 thing to babysit for zero benefit at this scale.
 
+## Downloads (no building required)
+
+Every merge to `main` that passes CI is automatically released, so you don't need to build anything:
+
+**Ready-made packages** on the [releases page](https://github.com/SieBRUM/minecraft-server-discovery/releases/latest).
+They're self-contained single executables, so no .NET install is needed. There are two per platform:
+`mcdiscovery-api-…` (API + website) and `mcdiscovery-scanner-…` (scanner + default `config/`).
+
+| OS | Packages |
+| --- | --- |
+| Linux (glibc: Ubuntu, Debian, Fedora, …) | `linux-x64`, `linux-arm64`, `linux-arm` (32-bit, e.g. older Raspberry Pi OS) |
+| Linux (musl: Alpine) | `linux-musl-x64`, `linux-musl-arm64` |
+| Windows | `win-x64`, `win-arm64`, `win-x86` |
+| macOS | `osx-arm64` (Apple Silicon), `osx-x64` (Intel) |
+
+```bash
+mkdir mcd-api && tar -xzf mcdiscovery-api-1.0.X-linux-x64.tar.gz -C mcd-api && ./mcd-api/mcd-api   # website on http://127.0.0.1:8080
+mkdir mcd-scanner && tar -xzf mcdiscovery-scanner-1.0.X-linux-x64.tar.gz -C mcd-scanner && ./mcd-scanner/mcd-scanner --help
+```
+
+On Windows, unzip and run `mcd-api.exe` / `mcd-scanner.exe`. Both use `data/mcdiscovery.db` relative to the
+directory you start them from (or `MCD_DB_PATH`), so start them from the same directory or set `MCD_DB_PATH`
+for both. masscan isn't bundled (it's a separate AGPL program; [see below](#building-and-running-it-without-docker-the-scenic-route)
+for installing it). Without it the scanner uses its built-in connect scanner. `SHA256SUMS.txt` on each release
+has the checksums. macOS builds aren't notarised, so the first time you may need `xattr -d com.apple.quarantine mcd-api`.
+
+**Docker images** for `linux/amd64` and `linux/arm64` on GitHub Container Registry:
+
+```bash
+docker pull ghcr.io/siebrum/minecraft-server-discovery-api:latest
+docker pull ghcr.io/siebrum/minecraft-server-discovery-scanner:latest
+```
+
+To use them with the compose file instead of building locally, put this in `docker-compose.override.yml`
+and run `docker compose up -d` (no `--build`):
+
+```yaml
+services:
+  api:
+    image: ghcr.io/siebrum/minecraft-server-discovery-api:latest
+  scanner:
+    image: ghcr.io/siebrum/minecraft-server-discovery-scanner:latest
+  rescanner:
+    image: ghcr.io/siebrum/minecraft-server-discovery-scanner:latest
+```
+
+Versions are `1.0.<build number>`; each release lists the commit it was built from.
+
 ## Running it with Docker (the easy way)
 
 **You need:** Docker with Compose v2 (Docker Engine on Linux, Docker Desktop on Windows/macOS) and git.
@@ -240,11 +291,11 @@ dotnet run --project src/McDiscovery.Api -c Release
 dotnet run --project src/McDiscovery.Scanner -c Release -- scan --targets-file config/targets.txt --exclude-file config/exclude.txt
 ```
 
-**Optional: publish standalone binaries** (for example to copy to a server)
+**Optional: build the release packages yourself** (the same script CI uses; any platform from the
+[downloads table](#downloads-no-building-required), after building the website):
 
 ```bash
-dotnet publish src/McDiscovery.Api -c Release -o out/api          # then copy web/dist/web/browser into out/api/wwwroot
-dotnet publish src/McDiscovery.Scanner -c Release -o out/scanner  # run as out/scanner/mcd-scanner
+build/package.sh 1.0.0-local linux-x64 dist      # → dist/mcdiscovery-{api,scanner}-1.0.0-local-linux-x64.tar.gz
 ```
 
 Point both at another database with `MCD_DB_PATH` (or the scanner's `--db`); they must use the same file.
@@ -404,7 +455,8 @@ ranges are only skipped when you pass `--exclude-file config/exclude.txt`, so le
 `dotnet tool restore && dotnet ef migrations add <Name> --project src/McDiscovery.Core --startup-project src/McDiscovery.Core --output-dir Data/Migrations`.
 
 **CI** (GitHub Actions) builds and tests on Ubuntu and Windows, tests and builds the website, builds both
-Docker images and smoke-tests them, and runs CodeQL. It does not scan anything, because GitHub would rightly
+Docker images and smoke-tests them, and runs CodeQL. When CI passes on `main`, the **Release** workflow builds
+the packages for all ten platforms, pushes the multi-arch Docker images to GHCR and publishes a GitHub Release. It does not scan anything, because GitHub would rightly
 be upset. More notes for contributors (and their AI assistants) are in [CLAUDE.md](CLAUDE.md).
 
 ## It doesn't work!

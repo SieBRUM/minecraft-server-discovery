@@ -1,0 +1,205 @@
+# Publishes a release every time CI passes on main:
+#  - self-contained single-file packages of the API (with the website) and the scanner for every platform
+#    .NET supports, attached to a GitHub Release
+#  - multi-arch Docker images (linux/amd64 + linux/arm64) on GitHub Container Registry
+# Version: <MAJOR_MINOR>.<run number>, e.g. 1.0.7. Bump MAJOR_MINOR below for a new major/minor line.
+# Nothing here scans anything.
+name: Release
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  MAJOR_MINOR: '1.0'
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  prepare:
+    # Only after a successful CI run for a push to main (not for pull requests), or when started by hand.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      sha: ${{ steps.v.outputs.sha }}
+    steps:
+      - id: v
+        run: |
+          echo "version=${MAJOR_MINOR}.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          echo "sha=${{ github.event.workflow_run.head_sha || github.sha }}" >> "$GITHUB_OUTPUT"
+
+  website:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci && npx ng build
+        working-directory: web
+      - uses: actions/upload-artifact@v4
+        with:
+          name: website
+          path: web/dist/web/browser
+          retention-days: 1
+
+  packages:
+    name: Packages (${{ matrix.rid }})
+    needs: [prepare, website]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { rid: linux-x64, os: ubuntu-latest }
+          - { rid: linux-arm64, os: ubuntu-latest }
+          - { rid: linux-arm, os: ubuntu-latest }
+          - { rid: linux-musl-x64, os: ubuntu-latest }
+          - { rid: linux-musl-arm64, os: ubuntu-latest }
+          - { rid: win-x64, os: ubuntu-latest }
+          - { rid: win-x86, os: ubuntu-latest }
+          - { rid: win-arm64, os: ubuntu-latest }
+          # macOS executables must be code-signed (ad hoc) to run on Apple Silicon; that only happens on macOS.
+          - { rid: osx-x64, os: macos-latest }
+          - { rid: osx-arm64, os: macos-latest }
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - uses: actions/download-artifact@v5
+        with:
+          name: website
+          path: web/dist/web/browser
+      - name: Build packages
+        run: build/package.sh "${{ needs.prepare.outputs.version }}" "${{ matrix.rid }}" dist
+      - name: Smoke test
+        if: matrix.rid == 'linux-x64'
+        run: |
+          mkdir -p smoke && tar -xzf dist/mcdiscovery-scanner-*-linux-x64.tar.gz -C smoke
+          smoke/mcd-scanner scan --targets 192.0.2.1 --dry-run --geoip-update=false
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages-${{ matrix.rid }}
+          path: dist/*
+          retention-days: 1
+
+  docker:
+    name: Docker images
+    needs: prepare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Image names
+        id: names
+        run: echo "prefix=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+      - name: API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/api.Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ steps.names.outputs.prefix }}-api:${{ needs.prepare.outputs.version }}
+            ${{ steps.names.outputs.prefix }}-api:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=${{ needs.prepare.outputs.version }}
+            org.opencontainers.image.revision=${{ needs.prepare.outputs.sha }}
+            org.opencontainers.image.licenses=Apache-2.0
+          cache-from: type=gha,scope=release-api
+          cache-to: type=gha,mode=max,scope=release-api
+      - name: Scanner image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/scanner.Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ steps.names.outputs.prefix }}-scanner:${{ needs.prepare.outputs.version }}
+            ${{ steps.names.outputs.prefix }}-scanner:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=${{ needs.prepare.outputs.version }}
+            org.opencontainers.image.revision=${{ needs.prepare.outputs.sha }}
+            org.opencontainers.image.licenses=Apache-2.0
+          cache-from: type=gha,scope=release-scanner
+          cache-to: type=gha,mode=max,scope=release-scanner
+
+  release:
+    name: GitHub Release
+    needs: [prepare, packages, docker]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: packages-*
+          path: dist
+          merge-multiple: true
+      - name: Checksums
+        working-directory: dist
+        run: sha256sum * > SHA256SUMS.txt && cat SHA256SUMS.txt
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          SHA: ${{ needs.prepare.outputs.sha }}
+          IMAGES: ghcr.io/${{ github.repository }}
+        run: |
+          images="${IMAGES,,}"
+          cat > notes.md <<NOTES
+          Automatic release of \`${SHA:0:7}\`.
+
+          **Packages** (self-contained, no .NET install needed): download the API (includes the website) and/or the
+          scanner for your platform, extract, and run \`mcd-api\` / \`mcd-scanner\` (\`.exe\` on Windows). See the
+          README section "Building and running it without Docker". masscan is not included; install it separately
+          for fast scanning (the scanner falls back to its built-in connect scanner without it).
+
+          **Docker images** (linux/amd64 and linux/arm64):
+          - \`${images}-api:${VERSION}\`
+          - \`${images}-scanner:${VERSION}\`
+
+          Checksums are in \`SHA256SUMS.txt\`.
+          NOTES
+          gh release create "v${VERSION}" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$SHA" \
+            --title "v${VERSION}" \
+            --notes-file notes.md \
+            --generate-notes
