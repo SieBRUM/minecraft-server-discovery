@@ -20,6 +20,7 @@ works on Linux and Windows, no credentials in the repo, credit third parties.
 | `web/` | Angular 22, standalone components, signals, zoneless, Angular Material, Leaflet, Chart.js, Vitest |
 | `tests/McDiscovery.Tests` | xUnit v3 on Microsoft.Testing.Platform. Protocol, scanner (pipeline end-to-end on loopback), API (WebApplicationFactory) |
 | `tests/McDiscovery.FakeServer` | Fake Java/query/Bedrock server, implemented independently of `Protocol` on purpose. Also a runnable exe |
+| `build/package.sh` | Release packaging for one runtime id (used by the Release workflow) |
 | `docker/` | `api.Dockerfile` (node build → dotnet publish → aspnet), `scanner.Dockerfile` (runtime + masscan with file caps) |
 | `config/` | `targets.txt` (empty by default), `exclude.txt`; mounted read-only into the scanner |
 
@@ -80,6 +81,12 @@ versions in `Directory.Packages.props`.
   Rings crossing ±180° are unwrapped (`unwrapAntimeridian`) and Antarctica is dropped, otherwise Leaflet draws stripes.
 - Footer must always show "Made by SieBRUM" linking to https://github.com/SieBRUM (owner's request; covered by `app.spec.ts`).
 - README screenshots live in `docs/screenshots/` and use fictional data on documentation IP ranges only.
+
+- **Releases**: `.github/workflows/release.yml` runs after CI succeeds on a push to `main` (`workflow_run`) or by
+  hand. Version `MAJOR_MINOR.<run number>`. `build/package.sh <version> <rid> <dir>` makes self-contained single-file
+  packages (API ships `wwwroot` + appsettings next to the exe; the API uses the exe folder as content root when a
+  `wwwroot` is there). osx-* must build on macOS runners (ad-hoc code signing). Docker images go to
+  `ghcr.io/<owner>/minecraft-server-discovery-{api,scanner}` for amd64 + arm64.
 
 ## Gotchas
 

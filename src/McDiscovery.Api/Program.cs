@@ -6,7 +6,11 @@ using McDiscovery.Core.Data;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
+// Release packages ship wwwroot and appsettings.json next to the executable. Use that folder as the content
+// root so the API also works when started from another directory; otherwise keep the default (current
+// directory), which is what `dotnet run` and the tests expect.
+var packagedRoot = Directory.Exists(Path.Combine(AppContext.BaseDirectory, "wwwroot")) ? AppContext.BaseDirectory : null;
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions { Args = args, ContentRootPath = packagedRoot });
 
 // ---- Configuration -------------------------------------------------------------------------------------
 var security = builder.Configuration.GetSection("Security").Get<SecurityOptions>() ?? new SecurityOptions();
