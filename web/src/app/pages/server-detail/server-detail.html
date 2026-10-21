@@ -17,18 +17,25 @@
       <div class="title">
         <h1>
           {{ s.address }}:{{ s.port }}
-          <button mat-button type="button" (click)="copy(s.address + ':' + s.port)">
-            {{ copied() ? 'Copied' : 'Copy' }}
+          <button
+            mat-stroked-button
+            type="button"
+            class="copy"
+            (click)="copy(s.address + ':' + s.port)"
+          >
+            {{ copied() ? 'Copied!' : 'Copy address' }}
           </button>
         </h1>
         <div class="badges">
-          <span class="badge" [class.on]="s.isOnline">{{ s.isOnline ? 'Online' : 'Offline' }}</span>
-          <span class="badge">{{ s.edition }} Edition</span>
+          <span class="pill" [class.ok]="s.isOnline" [class.bad]="!s.isOnline">{{
+            s.isOnline ? '● Online' : '● Offline'
+          }}</span>
+          <span class="pill">{{ s.edition }} Edition</span>
           @if (s.software) {
-            <span class="badge">{{ s.software }}</span>
+            <span class="pill">{{ s.software }}</span>
           }
           @if (s.modLoader && s.modLoader !== s.software) {
-            <span class="badge">{{ s.modLoader }}</span>
+            <span class="pill">{{ s.modLoader }}</span>
           }
         </div>
       </div>
@@ -124,9 +131,9 @@
             <dd>
               @if (mapLink(v); as link) {
                 <a [href]="link" target="_blank" rel="noopener noreferrer"
-                  >{{ v.latitude }}, {{ v.longitude }}</a
+                  >{{ v.latitude | number: '1.2-2' }}, {{ v.longitude | number: '1.2-2' }}</a
                 >
-                <span class="muted">(approximate)</span>
+                <span class="muted">&nbsp;(approximate)</span>
               } @else {
                 —
               }

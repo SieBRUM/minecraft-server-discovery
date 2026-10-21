@@ -9,7 +9,7 @@ import { MotdSegment } from '../core/models';
 @Component({
   selector: 'app-motd',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<span class="motd" [class.dark]="dark()">
+  template: `<span class="motd" [class.dark]="dark()" [class.compact]="compact()">
     @for (s of segments(); track $index) {
       <span
         [style.color]="s.color"
@@ -37,6 +37,16 @@ import { MotdSegment } from '../core/models';
       border-radius: 8px;
       font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
       line-height: 1.5;
+    }
+    /* Minecraft colours are made for a dark background: in lists the MOTD sits on a small in-game style chip. */
+    .motd.compact {
+      display: inline-block;
+      background: #1b1d1c;
+      color: #aaaaaa;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      line-height: 1.45;
     }
     .b {
       font-weight: 700;
@@ -66,4 +76,5 @@ export class Motd {
   readonly segments = input<MotdSegment[]>([]);
   readonly fallback = input('');
   readonly dark = input(false);
+  readonly compact = input(false);
 }

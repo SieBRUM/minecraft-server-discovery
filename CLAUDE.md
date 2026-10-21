@@ -72,6 +72,15 @@ versions in `Directory.Packages.props`.
   dictionaries via MaxMind.Db (`GeoIpService.FromRecords`) so database-type checks don't matter.
 - **License**: Apache-2.0 with a NOTICE file that downstream users must keep (attribution requirement).
 
+- **Theming**: `ThemeService` (system/light/dark, stored in localStorage) sets `color-scheme` and `data-theme`
+  on `<html>`. Design tokens in `web/src/styles.scss` use `light-dark()`. Canvas code (Chart.js, Leaflet) must
+  resolve colours with `cssVar()` (it computes them on a probe element; raw `light-dark(...)` strings render black)
+  and redraw when `theme.dark()` changes.
+- **Map**: the base map is bundled Natural Earth outlines (`world-atlas`, lazy-loaded); OSM tiles are opt-in.
+  Rings crossing ±180° are unwrapped (`unwrapAntimeridian`) and Antarctica is dropped, otherwise Leaflet draws stripes.
+- Footer must always show "Made by SieBRUM" linking to https://github.com/SieBRUM (owner's request; covered by `app.spec.ts`).
+- README screenshots live in `docs/screenshots/` and use fictional data on documentation IP ranges only.
+
 ## Gotchas
 
 - EF Core on SQLite can't `OrderBy` a projected record member after `GroupBy`; order by `g.Count()` before `Select`.

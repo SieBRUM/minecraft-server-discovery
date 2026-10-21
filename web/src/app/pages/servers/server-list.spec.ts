@@ -65,7 +65,7 @@ describe('ServerList', () => {
     expect(row?.textContent).toContain('1.2.3.4:25565');
     expect(row?.textContent).toContain('Hello');
     expect(row?.textContent).toContain('3 / 20');
-    expect(row?.textContent).toContain('offline');
+    expect(row?.textContent).toContain('cracked');
     http.verify();
   });
 });

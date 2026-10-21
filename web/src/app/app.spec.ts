@@ -18,5 +18,8 @@ describe('App', () => {
     expect(links).toEqual(['Servers', 'Map', 'Players', 'Stats', 'About']);
     const attribution = el.querySelector('footer a[href="https://db-ip.com"]');
     expect(attribution?.textContent).toContain('IP Geolocation by DB-IP');
+    const author = el.querySelector('footer a[href="https://github.com/SieBRUM"]');
+    expect(author?.textContent?.trim()).toBe('SieBRUM');
+    expect(el.querySelector('footer')?.textContent).toContain('Made by SieBRUM');
   });
 });
