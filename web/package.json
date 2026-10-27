@@ -21,7 +21,7 @@
     "@angular/material": "^22.2.3",
     "@angular/platform-browser": "^22.2.0",
     "@angular/router": "^22.2.0",
-    "chart.js": "^4.5.1",
+    "chart.js": "^4.6.1",
     "leaflet": "^1.9.4",
     "rxjs": "~7.8.0",
     "topojson-client": "^3.1.0",
