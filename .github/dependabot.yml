@@ -16,6 +16,10 @@ updates:
         patterns: ['@angular/*', '@angular-devkit/*', 'typescript', 'vitest', 'jsdom']
       other:
         patterns: ['*']
+    ignore:
+      # Angular pins TypeScript to one minor (e.g. Angular 22 needs >=6.0 <6.1). Bump it with Angular by hand.
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
   - package-ecosystem: docker
     directory: /docker
     schedule:
