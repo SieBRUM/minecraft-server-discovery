@@ -55,7 +55,7 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: npm ci && npx ng build
         working-directory: web
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: website
           path: web/dist/web/browser
@@ -98,7 +98,7 @@ jobs:
         run: |
           mkdir -p smoke && tar -xzf dist/mcdiscovery-scanner-*-linux-x64.tar.gz -C smoke
           smoke/mcd-scanner scan --targets 192.0.2.1 --dry-run --geoip-update=false
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: packages-${{ matrix.rid }}
           path: dist/*
