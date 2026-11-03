@@ -87,7 +87,7 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         with:
           name: website
           path: web/dist/web/browser
@@ -167,7 +167,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         with:
           pattern: packages-*
           path: dist
