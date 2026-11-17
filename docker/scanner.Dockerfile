@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Scanner image (includes masscan). Build context: repository root.
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:11.0 AS build
 ARG TARGETARCH
 WORKDIR /src
 COPY global.json Directory.Build.props Directory.Packages.props .editorconfig ./
