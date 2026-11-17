@@ -22,7 +22,7 @@ COPY src/McDiscovery.Api/ src/McDiscovery.Api/
 RUN dotnet publish src/McDiscovery.Api/McDiscovery.Api.csproj -c Release -a $TARGETARCH --no-restore -o /out
 
 # ---- Runtime -----------------------------------------------------------------------------------------
-FROM mcr.microsoft.com/dotnet/aspnet:10.0
+FROM mcr.microsoft.com/dotnet/aspnet:11.0
 WORKDIR /app
 COPY --from=build /out ./
 COPY --from=web /web/dist/web/browser ./wwwroot
