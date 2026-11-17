@@ -14,7 +14,7 @@ COPY src/McDiscovery.Protocol/ src/McDiscovery.Protocol/
 COPY src/McDiscovery.Scanner/ src/McDiscovery.Scanner/
 RUN dotnet publish src/McDiscovery.Scanner/McDiscovery.Scanner.csproj -c Release -a $TARGETARCH --no-restore -o /out
 
-FROM mcr.microsoft.com/dotnet/runtime:10.0
+FROM mcr.microsoft.com/dotnet/runtime:11.0
 # masscan needs raw sockets. Instead of running as root, the binary gets file capabilities; the container
 # must be started with cap_add NET_RAW + NET_ADMIN (see docker-compose.yml) for them to take effect.
 # libpcap is only a "recommends" of the masscan package, but masscan dlopen()s it at runtime.
